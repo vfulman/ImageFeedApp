@@ -22,10 +22,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="6UG-y3-bSA">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="6UG-y3-bSA">
                                 <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" name="YP Black"/>
+                                <color key="sectionIndexBackgroundColor" name="YP Black"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ImagesListCell" rowHeight="174" id="CIk-Vv-QGW" customClass="ImagesListCell" customModule="ImageFeedApp" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="50" width="393" height="174"/>
@@ -73,6 +73,7 @@
                                                 <constraint firstItem="HAY-ro-T7J" firstAttribute="bottom" secondItem="53y-FI-sDa" secondAttribute="bottom" constant="-8" id="nGT-8a-5pM"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" name="YP Black"/>
                                         <connections>
                                             <outlet property="contentImage" destination="53y-FI-sDa" id="6Qv-XX-JWp"/>
                                             <outlet property="dateStamp" destination="HAY-ro-T7J" id="hCX-pq-tRs"/>
@@ -88,6 +89,12 @@
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black"/>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="6UG-y3-bSA" secondAttribute="bottom" id="7a8-mf-D9s"/>
+                            <constraint firstItem="6UG-y3-bSA" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="dvh-Pv-nvz"/>
+                            <constraint firstItem="6UG-y3-bSA" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="tD7-VH-nDR"/>
+                            <constraint firstItem="6UG-y3-bSA" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="wZa-le-raP"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="tableView" destination="6UG-y3-bSA" id="ar2-6b-wym"/>
