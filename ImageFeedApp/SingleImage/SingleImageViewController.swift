@@ -18,9 +18,9 @@ final class SingleImageViewController: UIViewController {
     }
     
     @IBOutlet private var singleImage: UIImageView!
-    @IBOutlet var backwardButton: UIButton!
-    @IBOutlet var scrollView: UIScrollView!
-    @IBOutlet var shareButton: UIButton!
+    @IBOutlet private var backwardButton: UIButton!
+    @IBOutlet private var scrollView: UIScrollView!
+    @IBOutlet private var shareButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
