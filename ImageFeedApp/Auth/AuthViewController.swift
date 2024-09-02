@@ -7,10 +7,19 @@
 
 import UIKit
 
+protocol AuthViewControllerDelegate: AnyObject {
+    func didAuthenticate(_ vc: AuthViewController)
+}
+
 final class AuthViewController: UIViewController {
-    private let ShowWebViewSegueIdentifier = "ShowWebView"
+    weak var delegate: AuthViewControllerDelegate?
+    
+    private let oAuth2Service = OAuth2Service.shared
+    private let showWebViewSegueIdentifier = "ShowWebView"
     private let logoImageView = UIImageView()
     private let loginButton = UIButton(type: .custom)
+    
+    private let storage = OAuth2TokenStorage()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,7 +28,7 @@ final class AuthViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard segue.identifier == ShowWebViewSegueIdentifier
+        guard segue.identifier == showWebViewSegueIdentifier
         else {
             super.prepare(for: segue, sender: sender)
             return
@@ -27,7 +36,8 @@ final class AuthViewController: UIViewController {
         
         guard let webViewViewController = segue.destination as? WebViewViewController
         else {
-            fatalError("Failed to prepare for \(ShowWebViewSegueIdentifier)")
+            assertionFailure("Failed to prepare for \(showWebViewSegueIdentifier)")
+            return
         }
         webViewViewController.delegate = self
     }
@@ -59,13 +69,22 @@ final class AuthViewController: UIViewController {
     
     @objc
     private func didTapLoginButton() {
-        performSegue(withIdentifier: ShowWebViewSegueIdentifier, sender: nil)
+        performSegue(withIdentifier: showWebViewSegueIdentifier, sender: nil)
     }
 }
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        // TODO LATER
+        oAuth2Service.fetchOAuthToken(code: code) { result in
+            switch result {
+            case .success(let accessToken):
+                self.storage.storeToken(accessToken)
+                self.delegate?.didAuthenticate(self)
+            case .failure(let error):
+                print("webViewViewController: Cant fetch token by \(code). \(error)")
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
     }
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         navigationController?.popViewController(animated: true)
