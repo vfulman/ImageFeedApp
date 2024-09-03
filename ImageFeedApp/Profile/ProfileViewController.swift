@@ -6,8 +6,10 @@
 //
 
 import UIKit
+import WebKit
 
 final class ProfileViewController: UIViewController {
+    private let storage = OAuth2TokenStorage()
     private let profileImageView = UIImageView()
     private let nameLabel = UILabel()
     private let usernameLabel = UILabel()
@@ -65,11 +67,32 @@ final class ProfileViewController: UIViewController {
     private func createLogoutButton() {
         logoutButton.setImage(UIImage(resource: .logout), for: .normal)
         logoutButton.translatesAutoresizingMaskIntoConstraints = false
+        logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
         view.addSubview(logoutButton)
         logoutButton.widthAnchor.constraint(equalToConstant: 44.0).isActive = true
         logoutButton.heightAnchor.constraint(equalToConstant: 44.0).isActive = true
         logoutButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -14).isActive = true
         logoutButton.centerYAnchor.constraint(equalTo: profileImageView.centerYAnchor).isActive = true
+    }
+    
+    @objc
+    private func didTapLogoutButton() {
+        storage.removeToken()
+        
+        HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
+        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+            records.forEach { record in
+                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
+            }
+        }
+        
+        guard let window = UIApplication.shared.windows.first else {
+            assertionFailure("didTapLogoutButton: Invalid window configuration")
+            return
+        }
+        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
+            .instantiateViewController(withIdentifier: "SplashScreenId")
+        window.rootViewController = tabBarController
     }
 }
 
