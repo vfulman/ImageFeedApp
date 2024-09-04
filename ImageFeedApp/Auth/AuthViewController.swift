@@ -20,7 +20,7 @@ final class AuthViewController: UIViewController {
     private let loginButton = UIButton(type: .custom)
     
     private let storage = OAuth2TokenStorage()
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         createProfileImageView()
@@ -75,7 +75,11 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        oAuth2Service.fetchOAuthToken(code: code) { result in
+        navigationController?.popViewController(animated: true)
+        UIBlockingProgressHUD.show()
+        oAuth2Service.fetchOAuthToken(code: code) { [weak self] result in
+            guard let self else { return }
+            UIBlockingProgressHUD.dismiss()
             switch result {
             case .success(let accessToken):
                 self.storage.storeToken(accessToken)
