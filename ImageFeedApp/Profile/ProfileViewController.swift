@@ -10,6 +10,7 @@ import WebKit
 
 final class ProfileViewController: UIViewController {
     private let storage = OAuth2TokenStorage()
+    
     private let profileImageView = UIImageView()
     private let nameLabel = UILabel()
     private let loginNameLabel = UILabel()
@@ -17,6 +18,8 @@ final class ProfileViewController: UIViewController {
     private let logoutButton = UIButton(type: .custom)
     
     private let profileService = ProfileService.shared
+    
+    private var profileImageServiceObserver: NSObjectProtocol?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,8 +29,27 @@ final class ProfileViewController: UIViewController {
         createBioLabel()
         createLogoutButton()
         updateProfileDetails(profile: profileService.profile)
+        
+        profileImageServiceObserver = NotificationCenter.default.addObserver(
+            forName: ProfileImageService.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.updateProfileImage()
+        }
+        updateProfileImage()
+        
     }
-
+    
+    private func updateProfileImage() {
+        guard 
+            let profileImageURL = ProfileImageService.shared.profileImageURL,
+            let url = URL(string: profileImageURL)
+        else { return }
+        // TODO [Sprint 11] Обновить аватар, используя Kingfisher
+    }
+    
     private func updateProfileDetails(profile: Profile?) {
         guard let profile = profile
         else {

@@ -32,10 +32,10 @@ enum ProfileServiceConstants {
 }
 
 final class ProfileService {
+    static let shared = ProfileService()
+
     var lastToken: String?
     var task: URLSessionTask?
-    
-    static let shared = ProfileService()
     
     private(set) var profile: Profile?
     

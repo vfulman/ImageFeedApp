@@ -27,12 +27,11 @@ enum ProfileImageServiceConstants {
 }
 
 final class ProfileImageService {
-    
+    static let shared = ProfileImageService()
+    static let didChangeNotification = Notification.Name(rawValue: "ProfileImageProviderDidChange")
+
     var lastUsername: String?
     var task: URLSessionTask?
-    static let shared = ProfileImageService()
-    
-    private let storage = OAuth2TokenStorage()
     
     private(set) var profileImageURL: String?
     
@@ -71,6 +70,11 @@ final class ProfileImageService {
                         let userData = try JSONDecoder().decode(UserResultBody.self, from: data)
                         self.profileImageURL = userData.profile_image["small"]
                         completion(.success(()))
+                        NotificationCenter.default.post(
+                                name: ProfileImageService.didChangeNotification,
+                                object: self,
+                                userInfo: ["URL": self.profileImageURL as Any]
+                        )
                     } catch {
                         print("fetchProfileImageURL: Decoding failure \(error)")
                         completion(.failure(error))
