@@ -16,7 +16,9 @@ final class SplashViewController: UIViewController {
     
     private let launchLogoImageView = UIImageView()
     private let storage = OAuth2TokenStorage()
+    
     private let profileService = ProfileService.shared
+    private let profileImageService = ProfileImageService.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,11 +76,15 @@ extension SplashViewController: AuthViewControllerDelegate {
     
     private func fetchProfile(_ token: String) {
         UIBlockingProgressHUD.show()
+                
         profileService.fetchProfile(token) { [weak self] result in
             UIBlockingProgressHUD.dismiss()
             guard let self else { return }
             switch result {
             case .success():
+                if let username = profileService.profile?.username {
+                    profileImageService.fetchProfileImageURL(username, token) { _ in }
+                }
                 switchToTabBarController()
             case .failure(let error):
                 assertionFailure("updateProfileInfo: Cant update profile info by token. \(error)")
