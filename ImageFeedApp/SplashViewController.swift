@@ -8,6 +8,7 @@
 import UIKit
 
 final class SplashViewController: UIViewController {
+    
     private enum seguesId: String {
         case showAuthViewSegueIdentifier = "showAuthView"
         case showImagesListViewSegueIdentifier = "showImagesListView"
@@ -15,7 +16,7 @@ final class SplashViewController: UIViewController {
     
     private let launchLogoImageView = UIImageView()
     private let storage = OAuth2TokenStorage()
-    
+    private let profileService = ProfileService.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,9 +41,8 @@ final class SplashViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        if storage.loadToken() != nil {
-            switchToTabBarController()
+        if let token = storage.loadToken() {
+            fetchProfile(token)
         } else {
             performSegue(withIdentifier: seguesId.showAuthViewSegueIdentifier.rawValue, sender: nil)
         }
@@ -71,8 +71,28 @@ final class SplashViewController: UIViewController {
 }
 
 extension SplashViewController: AuthViewControllerDelegate {
+    
+    private func fetchProfile(_ token: String) {
+        UIBlockingProgressHUD.show()
+        profileService.fetchProfile(token) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
+            guard let self else { return }
+            switch result {
+            case .success():
+                switchToTabBarController()
+            case .failure(let error):
+                assertionFailure("updateProfileInfo: Cant update profile info by token. \(error)")
+            }
+        }
+    }
+    
     func didAuthenticate(_ vc: AuthViewController) {
         vc.dismiss(animated: true)
-        switchToTabBarController()
+        guard let token = storage.loadToken()
+        else {
+            print("didAuthenticate: authorization token was not found")
+            return
+        }
+        fetchProfile(token)
     }
 }
