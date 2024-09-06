@@ -7,6 +7,7 @@
 
 import UIKit
 import WebKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     private let storage = OAuth2TokenStorage()
@@ -16,7 +17,7 @@ final class ProfileViewController: UIViewController {
     private let loginNameLabel = UILabel()
     private let bioLabel = UILabel()
     private let logoutButton = UIButton(type: .custom)
-    
+        
     private let profileService = ProfileService.shared
     
     private var profileImageServiceObserver: NSObjectProtocol?
@@ -43,11 +44,22 @@ final class ProfileViewController: UIViewController {
     }
     
     private func updateProfileImage() {
-        guard 
+        guard
             let profileImageURL = ProfileImageService.shared.profileImageURL,
             let url = URL(string: profileImageURL)
         else { return }
-        // TODO [Sprint 11] Обновить аватар, используя Kingfisher
+        profileImageView.kf.setImage(
+            with: url,
+            placeholder: UIImage(resource: .defaultUserpic)
+        ) { result in
+                switch result {
+                case .success(let value):
+                    print(value.image)
+                    print(value.cacheType)
+                case .failure(let error):
+                    print("updateProfileImage: Image loading error \(error)")
+                }
+            }
     }
     
     private func updateProfileDetails(profile: Profile?) {
@@ -63,14 +75,18 @@ final class ProfileViewController: UIViewController {
     }
     
     private func createProfileImageView() {
+        let imageSize = 70.0
         let profileImage = UIImage(resource: .defaultUserpic)
         profileImageView.image = profileImage
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(profileImageView)
-        profileImageView.widthAnchor.constraint(equalToConstant: 70.0).isActive = true
-        profileImageView.heightAnchor.constraint(equalToConstant: 70.0).isActive = true
+        profileImageView.widthAnchor.constraint(equalToConstant: imageSize).isActive = true
+        profileImageView.heightAnchor.constraint(equalToConstant: imageSize).isActive = true
         profileImageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16).isActive = true
         profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32).isActive = true
+        profileImageView.layer.cornerRadius = imageSize / 2
+        profileImageView.clipsToBounds = true
+
     }
     
     private func createNameLabel() {

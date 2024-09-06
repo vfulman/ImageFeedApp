@@ -64,7 +64,7 @@ final class ProfileImageService {
                 case .failure(let error):
                     print("fetchProfileImageURL: failure \(error))")
                 case .success(let decodedUserData):
-                    self.profileImageURL = decodedUserData.profile_image["small"]
+                    self.profileImageURL = decodedUserData.profile_image["large"]
                     completion(.success(()))
                     NotificationCenter.default.post(
                             name: ProfileImageService.didChangeNotification,
