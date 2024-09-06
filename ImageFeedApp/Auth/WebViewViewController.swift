@@ -103,9 +103,7 @@ final class WebViewViewController: UIViewController {
         view.addSubview(progressView)
         progressView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
         progressView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
-        progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        
-        
+        progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true  
     }
     
     private func code(from navigationAction: WKNavigationAction) -> String? {

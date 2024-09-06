@@ -59,30 +59,22 @@ final class ProfileService {
             return
         }
         
-        let task = URLSession.shared.data(for: request) {[weak self] result in
+        let task = URLSession.shared.objectTask(for: request) {[weak self] (result: Result<ProfileResultBody, Error>) in
             DispatchQueue.main.async {
                 guard let self else { return }
-                
                 self.task = nil
                 self.lastToken = nil
-                
                 switch result {
                 case .failure(let error):
                     print("fetchProfile: failure \(error))")
-                case .success(let data):
-                    do {
-                        let profileData = try JSONDecoder().decode(ProfileResultBody.self, from: data)
-                        let lastName = profileData.last_name == nil ? "" : " \(profileData.last_name ?? "")"
-                        self.profile = Profile(
-                            username: profileData.username,
-                            name: profileData.first_name + lastName,
-                            loginName: "@\(profileData.username)",
-                            bio: profileData.bio ?? "")
-                        completion(.success(()))
-                    } catch {
-                        print("fetchProfile: Decoding failure \(error)")
-                        completion(.failure(error))
-                    }
+                case .success(let decodedProfileData):
+                    let lastName = decodedProfileData.last_name == nil ? "" : " \(decodedProfileData.last_name ?? "")"
+                    self.profile = Profile(
+                        username: decodedProfileData.username,
+                        name: decodedProfileData.first_name + lastName,
+                        loginName: "@\(decodedProfileData.username)",
+                        bio: decodedProfileData.bio ?? "")
+                    completion(.success(()))
                 }
             }
         }

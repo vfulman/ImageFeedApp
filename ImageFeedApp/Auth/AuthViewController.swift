@@ -20,9 +20,11 @@ final class AuthViewController: UIViewController {
     private let loginButton = UIButton(type: .custom)
     
     private let storage = OAuth2TokenStorage()
-        
+    private let alertPresenter = AlertPresenter()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        alertPresenter.delegate = self
         createProfileImageView()
         createLoginButton()
     }
@@ -86,6 +88,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 self.delegate?.didAuthenticate(self)
             case .failure(let error):
                 print("webViewViewController: Cant fetch token by \(code). \(error)")
+                alertPresenter.showAlert()
                 self.navigationController?.popViewController(animated: true)
             }
         }
@@ -95,5 +98,9 @@ extension AuthViewController: WebViewViewControllerDelegate {
     }
 }
 
-
+extension AuthViewController: AlertPresenterDelegate {
+    func present(_ alertToPresent: UIAlertController) {
+        present(alertToPresent, animated: true)
+    }
+}
 

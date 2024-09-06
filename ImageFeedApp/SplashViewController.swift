@@ -58,7 +58,7 @@ final class SplashViewController: UIViewController {
         
         let tabBarController = UIStoryboard(name: "Main", bundle: .main)
             .instantiateViewController(withIdentifier: "TabBarViewController")
-           
+        
         window.rootViewController = tabBarController
     }
     
@@ -76,7 +76,7 @@ extension SplashViewController: AuthViewControllerDelegate {
     
     private func fetchProfile(_ token: String) {
         UIBlockingProgressHUD.show()
-                
+        
         profileService.fetchProfile(token) { [weak self] result in
             UIBlockingProgressHUD.dismiss()
             guard let self else { return }
@@ -87,7 +87,13 @@ extension SplashViewController: AuthViewControllerDelegate {
                 }
                 switchToTabBarController()
             case .failure(let error):
-                assertionFailure("updateProfileInfo: Cant update profile info by token. \(error)")
+                if let error = error as? ProfileServiceError, error == ProfileServiceError.duplicateProfileInfoRequest {
+                    print("updateProfileInfo: \(error)")
+                }
+                else {
+                    assertionFailure("updateProfileInfo: Cant update profile info by token. \(error)")
+                }
+                
             }
         }
     }
