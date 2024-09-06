@@ -132,7 +132,11 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapLogoutButton() {
-        storage.removeToken()
+        let isRemoved = storage.removeToken()
+        guard isRemoved else {
+            print("didTapLogoutButton: Cant remove token from storage")
+            return
+        }
         
         HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
         WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in

@@ -84,8 +84,13 @@ extension AuthViewController: WebViewViewControllerDelegate {
             UIBlockingProgressHUD.dismiss()
             switch result {
             case .success(let accessToken):
-                self.storage.storeToken(accessToken)
-                self.delegate?.didAuthenticate(self)
+                if self.storage.storeToken(accessToken) {
+                    self.delegate?.didAuthenticate(self)
+                }
+                else {
+                    print("webViewViewController: Cant store token")
+                    self.navigationController?.popViewController(animated: true)
+                }
             case .failure(let error):
                 print("webViewViewController: Cant fetch token by \(code). \(error)")
                 alertPresenter.showAlert()
