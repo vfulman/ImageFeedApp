@@ -4,19 +4,35 @@ enum NetworkError: Error {
     case httpStatusCode(Int)
     case urlRequestError(Error)
     case urlSessionError
-}
-
-enum NetworkServiceError: Error {
     case invalidRequest
     case duplicateRequest
+    case decodingError
+    
+    var description: String {
+        switch self {
+        case .httpStatusCode(let int):
+            return "NetworkError - status code \(int)"
+        case .urlRequestError(let error):
+            return "NetworkError - request error \(error)"
+        case .urlSessionError:
+            return "NetworkError - session error"
+        case .invalidRequest:
+            return "NetworkError - invalid request"
+        case .duplicateRequest:
+            return "NetworkError - duplicate request"
+        case .decodingError:
+            return "NetworkError - decoding error"
+        }
+    }
+    
 }
 
 extension URLSession {
     func data(
         for request: URLRequest,
-        completion: @escaping (Result<Data, Error>) -> Void
+        completion: @escaping (Result<Data, NetworkError>) -> Void
     ) -> URLSessionTask {
-        let fulfillCompletionOnTheMainThread: (Result<Data, Error>) -> Void = { result in
+        let fulfillCompletionOnTheMainThread: (Result<Data, NetworkError>) -> Void = { result in
             DispatchQueue.main.async {
                 completion(result)
             }
@@ -46,13 +62,13 @@ extension URLSession {
 extension URLSession {
     func objectTask<T: Decodable>(
         for request: URLRequest,
-        completion: @escaping (Result<T, Error>) -> Void
+        completion: @escaping (Result<T, NetworkError>) -> Void
     ) -> URLSessionTask {
         let decoder = JSONDecoder()
-        let task = URLSession.shared.data(for: request) { (result: Result<Data, Error>) in
+        let task = URLSession.shared.data(for: request) { (result: Result<Data, NetworkError>) in
             switch result {
             case .failure(let error):
-                print("URLSession: Error \(error)")
+                print("URLSession: Error \(error.description)")
                 completion(.failure(error))
             case .success(let data):
                 do {
@@ -60,7 +76,7 @@ extension URLSession {
                     completion(.success(tokenData))
                 } catch {
                     print("URLSession: Decoding error: \(error.localizedDescription), Data: \(String(data: data, encoding: .utf8) ?? "")")
-                    completion(.failure(error))
+                    completion(.failure(NetworkError.decodingError))
                 }
             }
         }

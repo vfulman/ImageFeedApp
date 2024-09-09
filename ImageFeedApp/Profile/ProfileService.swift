@@ -37,24 +37,24 @@ final class ProfileService {
     
     private init() {}
     
-    func fetchProfile(_ token: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func fetchProfile(_ token: String, completion: @escaping (Result<Void, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
         
         task?.cancel()
         
         guard let request = makeProfileInfoRequest(token: token)
         else {
-            completion(.failure(NetworkServiceError.invalidRequest))
+            completion(.failure(NetworkError.invalidRequest))
             return
         }
         
-        let task = URLSession.shared.objectTask(for: request) {[weak self] (result: Result<ProfileResultBody, Error>) in
+        let task = URLSession.shared.objectTask(for: request) {[weak self] (result: Result<ProfileResultBody, NetworkError>) in
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.task = nil
                 switch result {
                 case .failure(let error):
-                    print("\(#file):\(#function):Fetch profile failure \(error))")
+                    print("\(#file):\(#function):Fetch profile failure \(error.description))")
                     completion(.failure(error))
                 case .success(let decodedProfileData):
                     let lastName = decodedProfileData.lastName == nil ? "" : " \(decodedProfileData.lastName ?? "")"

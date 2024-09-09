@@ -34,23 +34,23 @@ final class ProfileImageService {
     
     private init() {}
     
-    func fetchProfileImageURL(_ username: String, _ token: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func fetchProfileImageURL(_ username: String, _ token: String, completion: @escaping (Result<Void, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
         
         task?.cancel()
         guard let request = makeProfileImageRequest(username: username, token: token)
         else {
-            completion(.failure(NetworkServiceError.invalidRequest))
+            completion(.failure(NetworkError.invalidRequest))
             return
         }
         
-        let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<UserResultBody, Error>) in
+        let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<UserResultBody, NetworkError>) in
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.task = nil
                 switch result {
                 case .failure(let error):
-                    print("\(#file):\(#function): failure \(error))")
+                    print("\(#file):\(#function): failure \(error.description))")
                     completion(.failure(error))
                 case .success(let decodedUserData):
                     self.profileImageURL = decodedUserData.profileImage["large"]

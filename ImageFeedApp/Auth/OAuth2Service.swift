@@ -28,12 +28,12 @@ final class OAuth2Service {
     
     private init() {}
     
-    func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func fetchOAuthToken(code: String, completion: @escaping (Result<String, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
         
         guard lastCode != code
         else {
-            completion(.failure(NetworkServiceError.duplicateRequest))
+            completion(.failure(NetworkError.duplicateRequest))
             return
         }
         
@@ -42,18 +42,18 @@ final class OAuth2Service {
         
         guard let request = makeOAuthTokenRequest(code: code)
         else {
-            completion(.failure(NetworkServiceError.invalidRequest))
+            completion(.failure(NetworkError.invalidRequest))
             return
         }
         
-        let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+        let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, NetworkError>) in
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.task = nil
                 self.lastCode = nil
                 switch result {
                 case .failure(let error):
-                    print("\(#file):\(#function): failure \(error))")
+                    print("\(#file):\(#function): failure \(error.description))")
                     completion(.failure(error))
                 case .success(let decodedData):
                     completion(.success(decodedData.accessToken))

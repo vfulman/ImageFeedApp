@@ -62,13 +62,13 @@ extension SplashViewController: AuthViewControllerDelegate {
                         case .success():
                             break
                         case .failure(let error):
-                            print("\(#file):\(#function): Cant fetch profile image URL of \(username). \(error)")
+                            print("\(#file):\(#function): Cant fetch profile image URL of \(username). \(error.description)")
                         }
                     }
                 }
                 switchToTabBarController()
             case .failure(let error):
-                print("\(#file):\(#function): Cant update profile info by token. \(error)")
+                print("\(#file):\(#function): Cant update profile info by token. \(error.description)")
             }
         }
     }
