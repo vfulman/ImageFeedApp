@@ -1,10 +1,3 @@
-//
-//  WebViewViewController.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 31.08.2024.
-//
-
 import UIKit
 import WebKit
 
@@ -20,13 +13,14 @@ protocol WebViewViewControllerDelegate: AnyObject {
 final class WebViewViewController: UIViewController {
     weak var delegate: WebViewViewControllerDelegate?
     
-    private let segueIdentifier = "ShowWebView"
     private let webView = WKWebView()
     private let progressView = UIProgressView(progressViewStyle: .default)
     private var estimatedProgressObservation: NSKeyValueObservation?
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(resource: .ypWhite)
         webView.navigationDelegate = self
         createWebView()
         configureBackButton()

@@ -1,10 +1,3 @@
-//
-//  ProfileViewController.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 26.08.2024.
-//
-
 import UIKit
 import WebKit
 import Kingfisher
@@ -19,11 +12,12 @@ final class ProfileViewController: UIViewController {
     private let logoutButton = UIButton(type: .custom)
         
     private let profileService = ProfileService.shared
-    
     private var profileImageServiceObserver: NSObjectProtocol?
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(resource: .ypBlack)
         createProfileImageView()
         createNameLabel()
         createLoginNameLabel()
@@ -137,21 +131,16 @@ final class ProfileViewController: UIViewController {
             print("didTapLogoutButton: Cant remove token from storage")
             return
         }
-        
         HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
         WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
             records.forEach { record in
                 WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
             }
         }
-        
         guard let window = UIApplication.shared.windows.first else {
             assertionFailure("didTapLogoutButton: Invalid window configuration")
             return
         }
-        let splashScreenController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "SplashScreenId")
-        window.rootViewController = splashScreenController
+        window.rootViewController = SplashViewController()
     }
 }
-

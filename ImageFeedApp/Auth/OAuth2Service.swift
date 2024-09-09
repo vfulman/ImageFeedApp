@@ -1,13 +1,4 @@
-//
-//  OAuth2Service.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 01.09.2024.
-//
-
 import UIKit
-
-
 
 enum OAuthConstants {
     static let unsplashOAuthTokenURLString = "https://unsplash.com/oauth/token"

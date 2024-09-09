@@ -1,10 +1,3 @@
-//
-//  AlertPresenter.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 06.09.2024.
-//
-
 import UIKit
 
 protocol AlertPresenterDelegate: AnyObject {

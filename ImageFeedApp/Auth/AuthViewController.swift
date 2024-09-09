@@ -1,10 +1,3 @@
-//
-//  AuthViewController.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 30.08.2024.
-//
-
 import UIKit
 
 protocol AuthViewControllerDelegate: AnyObject {
@@ -15,33 +8,21 @@ final class AuthViewController: UIViewController {
     weak var delegate: AuthViewControllerDelegate?
     
     private let oAuth2Service = OAuth2Service.shared
-    private let showWebViewSegueIdentifier = "ShowWebView"
     private let logoImageView = UIImageView()
     private let loginButton = UIButton(type: .custom)
     
+    private let webViewViewController = WebViewViewController()
     private let storage = OAuth2TokenStorage()
     private let alertPresenter = AlertPresenter()
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(resource: .ypBlack)
         alertPresenter.delegate = self
+        webViewViewController.delegate = self
         createProfileImageView()
         createLoginButton()
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard segue.identifier == showWebViewSegueIdentifier
-        else {
-            super.prepare(for: segue, sender: sender)
-            return
-        }
-        
-        guard let webViewViewController = segue.destination as? WebViewViewController
-        else {
-            assertionFailure("Failed to prepare for \(showWebViewSegueIdentifier)")
-            return
-        }
-        webViewViewController.delegate = self
     }
     
     private func createProfileImageView() {
@@ -71,7 +52,7 @@ final class AuthViewController: UIViewController {
     
     @objc
     private func didTapLoginButton() {
-        performSegue(withIdentifier: showWebViewSegueIdentifier, sender: nil)
+        navigationController?.pushViewController(webViewViewController, animated: true)
     }
 }
 

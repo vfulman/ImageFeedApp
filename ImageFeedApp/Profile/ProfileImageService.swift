@@ -1,10 +1,3 @@
-//
-//  ProfileImageService.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 05.09.2024.
-//
-
 import UIKit
 
 struct UserResultBody: Decodable {
@@ -14,7 +7,6 @@ struct UserResultBody: Decodable {
     let last_name: String?
     let bio: String?
     let profile_image: [String: String]
-    
 }
 
 enum ProfileImageServiceError: Error {
@@ -74,7 +66,6 @@ final class ProfileImageService {
                 }
             }
         }
-        
         task.resume()
     }
     

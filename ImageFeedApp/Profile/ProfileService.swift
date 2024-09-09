@@ -1,10 +1,3 @@
-//
-//  ProfileService.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 04.09.2024.
-//
-
 import UIKit
 
 struct ProfileResultBody: Decodable {

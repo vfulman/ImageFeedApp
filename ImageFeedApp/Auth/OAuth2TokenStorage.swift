@@ -1,15 +1,9 @@
-//
-//  OAuth2TokenStorage.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 02.09.2024.
-//
-
 import UIKit
 import SwiftKeychainWrapper
 
 final class OAuth2TokenStorage {
     private let storage:UserDefaults = .standard
+    
     
     func storeToken(_ token: String) -> Bool {
         let isSuccess = KeychainWrapper.standard.set(token, forKey: "Auth token")

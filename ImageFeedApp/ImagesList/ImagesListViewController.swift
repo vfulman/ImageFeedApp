@@ -1,18 +1,10 @@
-//
-//  ViewController.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 22.08.2024.
-//
-
 import UIKit
 
 final class ImagesListViewController: UIViewController {
-    @IBOutlet private var tableView: UITableView!
-    
-    private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private let photosName: [String] = Array(0..<20).map{ "\($0)" }
     private let currentDate = Date()
+    private let singleImageView = SingleImageViewController()
+    private let imagesTableView = UITableView(frame: .zero, style: UITableView.Style.plain)
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -23,27 +15,25 @@ final class ImagesListViewController: UIViewController {
         return formatter
     }()
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
-        
+        createTableView()
+        singleImageView.modalPresentationStyle = .fullScreen
+        imagesTableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.reuseIdentifier)
+        imagesTableView.separatorStyle = .none
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-            if segue.identifier == showSingleImageSegueIdentifier {
-                guard
-                    let viewController = segue.destination as? SingleImageViewController,
-                    let indexPath = sender as? IndexPath
-                else {
-                    assertionFailure("Invalid segue destination")
-                    return
-                }
-                let image = UIImage(named: photosName[indexPath.row])
-                viewController.image = image
-            } else {
-                super.prepare(for: segue, sender: sender)
-            }
-        }
+    private func createTableView() {
+        imagesTableView.translatesAutoresizingMaskIntoConstraints = false
+        imagesTableView.backgroundColor = UIColor(resource: .ypBlack)
+        view.addSubview(imagesTableView)
+        imagesTableView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
+        imagesTableView.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
+        imagesTableView.delegate = self
+        imagesTableView.dataSource = self
+        imagesTableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
+    }
     
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         guard let image = UIImage(named: photosName[indexPath.row]) else {
@@ -55,8 +45,6 @@ final class ImagesListViewController: UIViewController {
         cell.likeButton.setImage(likeImage, for: .normal)
         cell.addGradientIfNeeded()
     }
-    
-    
 }
 
 extension ImagesListViewController: UITableViewDataSource {
@@ -70,16 +58,20 @@ extension ImagesListViewController: UITableViewDataSource {
         guard let imageListCell = cell as? ImagesListCell else {
             return UITableViewCell()
         }
-        
         configCell(for: imageListCell, with: indexPath)
-        
         return imageListCell
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
     }
 }
 
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: showSingleImageSegueIdentifier, sender: indexPath)
+        let image = UIImage(named: photosName[indexPath.row])
+        singleImageView.image = image
+        present(singleImageView, animated: true)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -90,6 +82,6 @@ extension ImagesListViewController: UITableViewDelegate {
         let imageViewWidth = tableView.bounds.width - imageInsets.left - imageInsets.right
         let scale = imageViewWidth / image.size.width
         let cellHeight = image.size.height * scale + imageInsets.top + imageInsets.bottom
-        return cellHeight
+        return ceil(cellHeight)
     }
 }
