@@ -1,9 +1,7 @@
 import UIKit
 import WebKit
 
-enum WebViewConstants {
-    static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
-}
+
 
 protocol WebViewViewControllerDelegate: AnyObject {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String)
@@ -17,6 +15,9 @@ final class WebViewViewController: UIViewController {
     private let progressView = UIProgressView(progressViewStyle: .default)
     private var estimatedProgressObservation: NSKeyValueObservation?
     
+    private enum WebViewConstants {
+        static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

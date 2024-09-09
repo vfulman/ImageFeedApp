@@ -61,12 +61,7 @@ extension SplashViewController: AuthViewControllerDelegate {
                 }
                 switchToTabBarController()
             case .failure(let error):
-                if let error = error as? ProfileServiceError, error == ProfileServiceError.duplicateProfileInfoRequest {
-                    print("updateProfileInfo: \(error)")
-                }
-                else {
-                    assertionFailure("updateProfileInfo: Cant update profile info by token. \(error)")
-                }
+                print("updateProfileInfo: Cant update profile info by token. \(error)")
             }
         }
     }

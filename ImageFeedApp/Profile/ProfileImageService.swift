@@ -1,22 +1,5 @@
 import UIKit
 
-struct UserResultBody: Decodable {
-    let username: String
-    let name: String
-    let first_name: String
-    let last_name: String?
-    let bio: String?
-    let profile_image: [String: String]
-}
-
-enum ProfileImageServiceError: Error {
-    case invalidRequest
-    case duplicateProfileImageURLRequest
-}
-
-enum ProfileImageServiceConstants {
-    static let unsplashUserPublicProfileURLString = "\(Constants.defaultBaseURL)/users/"
-}
 
 final class ProfileImageService {
     static let shared = ProfileImageService()
@@ -27,23 +10,28 @@ final class ProfileImageService {
     
     private(set) var profileImageURL: String?
     
+    private enum ProfileImageServiceConstants {
+        static let unsplashUserPublicProfileURLString = "\(Constants.defaultBaseURL)/users/"
+    }
+    
+    struct UserResultBody: Decodable {
+        let username: String
+        let name: String
+        let first_name: String
+        let last_name: String?
+        let bio: String?
+        let profile_image: [String: String]
+    }
+    
     private init() {}
     
     func fetchProfileImageURL(_ username: String, _ token: String, completion: @escaping (Result<Void, Error>) -> Void) {
         assert(Thread.isMainThread)
         
-        guard lastUsername != username
-        else {
-            completion(.failure(ProfileImageServiceError.duplicateProfileImageURLRequest))
-            return
-        }
-        
         task?.cancel()
-        lastUsername = username
-        
         guard let request = makeProfileImageRequest(username: username, token: token)
         else {
-            completion(.failure(ProfileImageServiceError.invalidRequest))
+            completion(.failure(NetworkServiceError.invalidRequest))
             return
         }
         
@@ -51,10 +39,10 @@ final class ProfileImageService {
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.task = nil
-                self.lastUsername = nil
                 switch result {
                 case .failure(let error):
                     print("fetchProfileImageURL: failure \(error))")
+                    completion(.failure(error))
                 case .success(let decodedUserData):
                     self.profileImageURL = decodedUserData.profile_image["large"]
                     completion(.success(()))
@@ -72,7 +60,7 @@ final class ProfileImageService {
     private func makeProfileImageRequest(username: String, token: String) -> URLRequest? {
         guard let url = URL(string: ProfileImageServiceConstants.unsplashUserPublicProfileURLString + username)
         else {
-            print("makeProfileInfoRequest: Can not create UTL from \(ProfileImageServiceConstants.unsplashUserPublicProfileURLString)\(username)")
+            print("makeProfileInfoRequest: Can not create URL from \(ProfileImageServiceConstants.unsplashUserPublicProfileURLString)\(username)")
             return nil
         }
         var request = URLRequest(url: url)

@@ -1,31 +1,21 @@
 import UIKit
 
-enum OAuthConstants {
-    static let unsplashOAuthTokenURLString = "https://unsplash.com/oauth/token"
-}
-
-enum AuthServiceError: Error {
-    case invalidRequest
-    case duplicateTokenRequest
-}
-
-struct OAuthTokenResponseBody: Decodable {
-    let access_token: String
-    let token_type: String
-    let scope: String
-    let created_at: Int
-}
 
 final class OAuth2Service {
-    enum NetworkError: Error {
-        case codeError
-        case loadImageError
-    }
-    
     static let shared = OAuth2Service()
     
     private var task: URLSessionTask?
     private var lastCode: String?
+    
+    private enum OAuthConstants {
+        static let unsplashOAuthTokenURLString = "https://unsplash.com/oauth/token"
+    }
+    private struct OAuthTokenResponseBody: Decodable {
+        let access_token: String
+        let token_type: String
+        let scope: String
+        let created_at: Int
+    }
     
     private init() {}
     
@@ -34,7 +24,7 @@ final class OAuth2Service {
         
         guard lastCode != code
         else {
-            completion(.failure(AuthServiceError.duplicateTokenRequest))
+            completion(.failure(NetworkServiceError.duplicateRequest))
             return
         }
         
@@ -43,7 +33,7 @@ final class OAuth2Service {
         
         guard let request = makeOAuthTokenRequest(code: code)
         else {
-            completion(.failure(AuthServiceError.invalidRequest))
+            completion(.failure(NetworkServiceError.invalidRequest))
             return
         }
         
@@ -55,6 +45,7 @@ final class OAuth2Service {
                 switch result {
                 case .failure(let error):
                     print("fetchOAuthToken: failure \(error))")
+                    completion(.failure(error))
                 case .success(let decodedData):
                     completion(.success(decodedData.access_token))
                 }
