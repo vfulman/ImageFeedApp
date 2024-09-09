@@ -57,11 +57,18 @@ extension SplashViewController: AuthViewControllerDelegate {
             switch result {
             case .success():
                 if let username = profileService.profile?.username {
-                    profileImageService.fetchProfileImageURL(username, token) { _ in }
+                    profileImageService.fetchProfileImageURL(username, token) { result in
+                        switch result {
+                        case .success():
+                            break
+                        case .failure(let error):
+                            print("\(#file):\(#function): Cant fetch profile image URL of \(username). \(error)")
+                        }
+                    }
                 }
                 switchToTabBarController()
             case .failure(let error):
-                print("updateProfileInfo: Cant update profile info by token. \(error)")
+                print("\(#file):\(#function): Cant update profile info by token. \(error)")
             }
         }
     }
@@ -70,7 +77,7 @@ extension SplashViewController: AuthViewControllerDelegate {
         vc.dismiss(animated: true)
         guard let token = storage.loadToken()
         else {
-            print("didAuthenticate: authorization token was not found")
+            print("\(#file):\(#function): authorization token was not found")
             return
         }
         fetchProfile(token)

@@ -11,11 +11,20 @@ final class OAuth2Service {
         static let unsplashOAuthTokenURLString = "https://unsplash.com/oauth/token"
     }
     private struct OAuthTokenResponseBody: Decodable {
-        let access_token: String
-        let token_type: String
+        let accessToken: String
+        let tokenType: String
         let scope: String
-        let created_at: Int
+        let createdAt: Int
+        
+        enum CodingKeys: String, CodingKey {
+            case accessToken = "access_token"
+            case tokenType = "token_type"
+            case scope
+            case createdAt = "created_at"
+        }
     }
+    
+    
     
     private init() {}
     
@@ -44,10 +53,10 @@ final class OAuth2Service {
                 self.lastCode = nil
                 switch result {
                 case .failure(let error):
-                    print("fetchOAuthToken: failure \(error))")
+                    print("\(#file):\(#function): failure \(error))")
                     completion(.failure(error))
                 case .success(let decodedData):
-                    completion(.success(decodedData.access_token))
+                    completion(.success(decodedData.accessToken))
                 }
             }
         }
@@ -56,7 +65,7 @@ final class OAuth2Service {
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: OAuthConstants.unsplashOAuthTokenURLString) else {
-            print("makeOAuthTokenRequest: Unable to create URLComponents with wtring \(OAuthConstants.unsplashOAuthTokenURLString)")
+            print("\(#file):\(#function): Unable to create URLComponents with wtring \(OAuthConstants.unsplashOAuthTokenURLString)")
             return nil
         }
         urlComponents.queryItems = [
@@ -68,7 +77,7 @@ final class OAuth2Service {
         ]
         
         guard let url = urlComponents.url else {
-            print("Unable to create URLComponents")
+            print("\(#file):\(#function): Unable to create URLComponents")
             return nil
         }
         

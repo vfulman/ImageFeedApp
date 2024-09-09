@@ -38,7 +38,7 @@ final class ImagesListCell: UITableViewCell {
         contentView.addSubview(dateStamp)
         dateStamp.leadingAnchor.constraint(equalTo: contentImage.leadingAnchor, constant: 8).isActive = true
         dateStamp.bottomAnchor.constraint(equalTo: contentImage.bottomAnchor, constant: -8).isActive = true
-        dateStamp.font = UIFont(name: "SFPro-Normal", size: 13)
+        dateStamp.font = UIFont(name: "SFPro-Regular", size: 13)
         dateStamp.textColor = UIColor.ypWhite
     }
     

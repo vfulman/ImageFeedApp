@@ -21,10 +21,18 @@ final class ProfileService {
     }
     private struct ProfileResultBody: Decodable {
         let username: String
-        let first_name: String
-        let last_name: String?
+        let firstName: String
+        let lastName: String?
         let bio: String?
         let email: String
+        
+        enum CodingKeys: String, CodingKey {
+            case username
+            case firstName = "first_name"
+            case lastName = "last_name"
+            case bio
+            case email
+        }
     }
     
     private init() {}
@@ -46,13 +54,13 @@ final class ProfileService {
                 self.task = nil
                 switch result {
                 case .failure(let error):
-                    print("fetchProfile: failure \(error))")
+                    print("\(#file):\(#function):Fetch profile failure \(error))")
                     completion(.failure(error))
                 case .success(let decodedProfileData):
-                    let lastName = decodedProfileData.last_name == nil ? "" : " \(decodedProfileData.last_name ?? "")"
+                    let lastName = decodedProfileData.lastName == nil ? "" : " \(decodedProfileData.lastName ?? "")"
                     self.profile = Profile(
                         username: decodedProfileData.username,
-                        name: decodedProfileData.first_name + lastName,
+                        name: decodedProfileData.firstName + lastName,
                         loginName: "@\(decodedProfileData.username)",
                         bio: decodedProfileData.bio ?? "")
                     completion(.success(()))
@@ -65,7 +73,7 @@ final class ProfileService {
     private func makeProfileInfoRequest(token: String) -> URLRequest? {
         guard let url = URL(string: ProfileServiceConstants.unsplashUserProfileURLString)
         else {
-            print("makeProfileInfoRequest: Can not create URL from \(ProfileServiceConstants.unsplashUserProfileURLString)")
+            print("\(#file):\(#function): Can not create URL from \(ProfileServiceConstants.unsplashUserProfileURLString)")
             return nil
         }
         var request = URLRequest(url: url)

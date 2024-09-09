@@ -40,6 +40,7 @@ final class AuthViewController: UIViewController {
         loginButton.translatesAutoresizingMaskIntoConstraints = false
         loginButton.setTitleColor(.ypBlack, for: .normal)
         loginButton.setTitle("Войти", for: .normal)
+        loginButton.titleLabel?.font = UIFont.init(name: "SFPro-Bold", size: 17)
         loginButton.backgroundColor = UIColor(resource: .ypWhite)
         loginButton.layer.cornerRadius = 16.0
         loginButton.addTarget(self, action: #selector(didTapLoginButton), for: .touchUpInside)
@@ -69,11 +70,11 @@ extension AuthViewController: WebViewViewControllerDelegate {
                     self.delegate?.didAuthenticate(self)
                 }
                 else {
-                    print("webViewViewController: Cant store token")
+                    print("\(#file):\(#function): Cant store token")
                     self.navigationController?.popViewController(animated: true)
                 }
             case .failure(let error):
-                print("webViewViewController: Cant fetch token by \(code). \(error)")
+                print("\(#file):\(#function): Cant fetch token by \(code). \(error)")
                 alertPresenter.showAlert()
                 self.navigationController?.popViewController(animated: true)
             }

@@ -52,6 +52,7 @@ extension URLSession {
         let task = URLSession.shared.data(for: request) { (result: Result<Data, Error>) in
             switch result {
             case .failure(let error):
+                print("URLSession: Error \(error)")
                 completion(.failure(error))
             case .success(let data):
                 do {

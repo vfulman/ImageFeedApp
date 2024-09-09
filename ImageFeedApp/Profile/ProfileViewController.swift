@@ -51,7 +51,7 @@ final class ProfileViewController: UIViewController {
                     print(value.image)
                     print(value.cacheType)
                 case .failure(let error):
-                    print("updateProfileImage: Image loading error \(error)")
+                    print("\(#file):\(#function): Image loading error \(error)")
                 }
             }
     }
@@ -59,7 +59,7 @@ final class ProfileViewController: UIViewController {
     private func updateProfileDetails(profile: Profile?) {
         guard let profile = profile
         else {
-            print("updateProfileDetails: Can not update profile info")
+            print("\(#file):\(#function): Can not update profile info")
             return
         }
         nameLabel.text = profile.name
@@ -95,7 +95,7 @@ final class ProfileViewController: UIViewController {
     
     private func createLoginNameLabel() {
         loginNameLabel.text = "@login_name"
-        loginNameLabel.font = UIFont(name: "SFPro-Normal", size: 13)
+        loginNameLabel.font = UIFont(name: "SFPro-Regular", size: 13)
         loginNameLabel.textColor = UIColor.ypGray
         loginNameLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(loginNameLabel)
@@ -105,7 +105,7 @@ final class ProfileViewController: UIViewController {
     
     private func createBioLabel() {
         bioLabel.text = "Bio Info"
-        bioLabel.font = UIFont(name: "SFPro-Normal", size: 13)
+        bioLabel.font = UIFont(name: "SFPro-Regular", size: 13)
         bioLabel.textColor = UIColor.ypWhite
         bioLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(bioLabel)
@@ -128,7 +128,7 @@ final class ProfileViewController: UIViewController {
     private func didTapLogoutButton() {
         let isRemoved = storage.removeToken()
         guard isRemoved else {
-            print("didTapLogoutButton: Cant remove token from storage")
+            print("\(#file):\(#function): Cant remove token from storage")
             return
         }
         HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
@@ -138,7 +138,7 @@ final class ProfileViewController: UIViewController {
             }
         }
         guard let window = UIApplication.shared.windows.first else {
-            assertionFailure("didTapLogoutButton: Invalid window configuration")
+            assertionFailure("\(#file):\(#function): Invalid window configuration")
             return
         }
         window.rootViewController = SplashViewController()

@@ -1,7 +1,7 @@
 import UIKit
 
 final class ImagesListViewController: UIViewController {
-    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
+    private let photosName = Array(0..<20).map{ "\($0)" }
     private let currentDate = Date()
     private let singleImageView = SingleImageViewController()
     private let imagesTableView = UITableView(frame: .zero, style: UITableView.Style.plain)
@@ -69,7 +69,9 @@ extension ImagesListViewController: UITableViewDataSource {
 
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let image = UIImage(named: photosName[indexPath.row])
+        guard let image = UIImage(named: photosName[indexPath.row]) else {
+            return
+        }
         singleImageView.image = image
         present(singleImageView, animated: true)
     }

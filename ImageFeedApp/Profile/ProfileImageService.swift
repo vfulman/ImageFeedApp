@@ -17,10 +17,19 @@ final class ProfileImageService {
     struct UserResultBody: Decodable {
         let username: String
         let name: String
-        let first_name: String
-        let last_name: String?
+        let firstName: String
+        let lastName: String?
         let bio: String?
-        let profile_image: [String: String]
+        let profileImage: [String: String]
+        
+        enum CodingKeys: String, CodingKey {
+            case username
+            case name
+            case firstName = "first_name"
+            case lastName = "last_name"
+            case bio
+            case profileImage = "profile_image"
+        }
     }
     
     private init() {}
@@ -41,10 +50,10 @@ final class ProfileImageService {
                 self.task = nil
                 switch result {
                 case .failure(let error):
-                    print("fetchProfileImageURL: failure \(error))")
+                    print("\(#file):\(#function): failure \(error))")
                     completion(.failure(error))
                 case .success(let decodedUserData):
-                    self.profileImageURL = decodedUserData.profile_image["large"]
+                    self.profileImageURL = decodedUserData.profileImage["large"]
                     completion(.success(()))
                     NotificationCenter.default.post(
                             name: ProfileImageService.didChangeNotification,
@@ -60,7 +69,7 @@ final class ProfileImageService {
     private func makeProfileImageRequest(username: String, token: String) -> URLRequest? {
         guard let url = URL(string: ProfileImageServiceConstants.unsplashUserPublicProfileURLString + username)
         else {
-            print("makeProfileInfoRequest: Can not create URL from \(ProfileImageServiceConstants.unsplashUserPublicProfileURLString)\(username)")
+            print("\(#file):\(#function): Can not create URL from \(ProfileImageServiceConstants.unsplashUserPublicProfileURLString)\(username)")
             return nil
         }
         var request = URLRequest(url: url)

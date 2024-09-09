@@ -32,9 +32,7 @@ final class WebViewViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        estimatedProgressObservation = webView.observe(
-            \.estimatedProgress,
-             options: []) { [weak self] _, _ in
+        estimatedProgressObservation = webView.observe(\.estimatedProgress, options: []) { [weak self] _, _ in
                  guard let self = self else { return }
                  self.updateProgress()}
     }
@@ -63,7 +61,7 @@ final class WebViewViewController: UIViewController {
     
     private func loadAuthView() {
         guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
-            print("loadAuthView: Can not create urlComponents with string \(WebViewConstants.unsplashAuthorizeURLString)")
+            print("\(#file):\(#function): Can not create urlComponents with string \(WebViewConstants.unsplashAuthorizeURLString)")
             return
         }
         
@@ -75,7 +73,7 @@ final class WebViewViewController: UIViewController {
         ]
         
         guard let url = urlComponents.url else {
-            print("loadAuthView: Can not found url in \(urlComponents)")
+            print("\(#file):\(#function): Can not found url in \(urlComponents)")
             return
         }
         
