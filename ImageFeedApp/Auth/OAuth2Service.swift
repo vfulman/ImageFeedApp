@@ -33,6 +33,7 @@ final class OAuth2Service {
         
         guard lastCode != code
         else {
+            print("\(#file):\(#function):\(NetworkError.duplicateRequest.description)")
             completion(.failure(NetworkError.duplicateRequest))
             return
         }
@@ -42,6 +43,7 @@ final class OAuth2Service {
         
         guard let request = makeOAuthTokenRequest(code: code)
         else {
+            print("\(#file):\(#function):\(NetworkError.invalidRequest.description)")
             completion(.failure(NetworkError.invalidRequest))
             return
         }

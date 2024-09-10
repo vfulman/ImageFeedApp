@@ -44,6 +44,7 @@ final class ProfileService {
         
         guard let request = makeProfileInfoRequest(token: token)
         else {
+            print("\(#file):\(#function):\(NetworkError.invalidRequest.description)")
             completion(.failure(NetworkError.invalidRequest))
             return
         }

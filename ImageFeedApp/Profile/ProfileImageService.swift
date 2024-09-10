@@ -40,6 +40,7 @@ final class ProfileImageService {
         task?.cancel()
         guard let request = makeProfileImageRequest(username: username, token: token)
         else {
+            print("\(#file):\(#function):\(NetworkError.invalidRequest.description)")
             completion(.failure(NetworkError.invalidRequest))
             return
         }
