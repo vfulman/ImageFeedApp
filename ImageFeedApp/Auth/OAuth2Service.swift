@@ -67,7 +67,7 @@ final class OAuth2Service {
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: OAuthConstants.unsplashOAuthTokenURLString) else {
-            print("\(#file):\(#function): Unable to create URLComponents with wtring \(OAuthConstants.unsplashOAuthTokenURLString)")
+            print("\(#file):\(#function): Unable to create URLComponents with url string: \(OAuthConstants.unsplashOAuthTokenURLString)")
             return nil
         }
         urlComponents.queryItems = [

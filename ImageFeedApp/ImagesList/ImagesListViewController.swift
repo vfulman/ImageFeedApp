@@ -6,8 +6,11 @@ final class ImagesListViewController: UIViewController {
     private let singleImageView = SingleImageViewController()
     private let imagesTableView = UITableView(frame: .zero, style: UITableView.Style.plain)
     
+    private let imageListService = ImagesListService.shared
+    
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
+//        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         formatter.dateStyle = .long
         formatter.timeStyle = .none
         formatter.locale = Locale(identifier: "ru_RU")
@@ -22,6 +25,8 @@ final class ImagesListViewController: UIViewController {
         singleImageView.modalPresentationStyle = .fullScreen
         imagesTableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.reuseIdentifier)
         imagesTableView.separatorStyle = .none
+        
+        imageListService.fetchPhotosNextPage { _ in }
     }
     
     private func createTableView() {

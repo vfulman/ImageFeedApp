@@ -11,7 +11,6 @@ struct Profile {
 final class ProfileService {
     static let shared = ProfileService()
 
-    var lastToken: String?
     var task: URLSessionTask?
     
     private(set) var profile: Profile?
