@@ -1,41 +1,90 @@
-//
-//  ProfileViewController.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 26.08.2024.
-//
-
 import UIKit
 import WebKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     private let storage = OAuth2TokenStorage()
+    
     private let profileImageView = UIImageView()
     private let nameLabel = UILabel()
-    private let usernameLabel = UILabel()
-    private let statusLabel = UILabel()
+    private let loginNameLabel = UILabel()
+    private let bioLabel = UILabel()
     private let logoutButton = UIButton(type: .custom)
+        
+    private let profileService = ProfileService.shared
+    private var profileImageServiceObserver: NSObjectProtocol?
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(resource: .ypBlack)
         createProfileImageView()
         createNameLabel()
-        createUserNameLabel()
-        createStatusLabel()
+        createLoginNameLabel()
+        createBioLabel()
         createLogoutButton()
+        updateProfileDetails(profile: profileService.profile)
+        
+        profileImageServiceObserver = NotificationCenter.default.addObserver(
+            forName: ProfileImageService.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.updateProfileImage()
+        }
+        updateProfileImage()
+        
+    }
+    
+    private func updateProfileImage() {
+        guard
+            let profileImageURL = ProfileImageService.shared.profileImageURL,
+            let url = URL(string: profileImageURL)
+        else { return }
+        profileImageView.kf.setImage(
+            with: url,
+            placeholder: UIImage(resource: .defaultUserpic)
+        ) { result in
+                switch result {
+                case .success(let value):
+                    print(value.image)
+                    print(value.cacheType)
+                case .failure(let error):
+                    print("\(#file):\(#function): Image loading error \(error)")
+                }
+            }
+    }
+    
+    private func updateProfileDetails(profile: Profile?) {
+        guard let profile = profile
+        else {
+            print("\(#file):\(#function): Can not update profile info")
+            return
+        }
+        nameLabel.text = profile.name
+        loginNameLabel.text = profile.loginName
+        bioLabel.text = profile.bio
+        
     }
     
     private func createProfileImageView() {
-        let profileImage = UIImage(resource: .userpick)
+        let imageSize = 70.0
+        let profileImage = UIImage(resource: .defaultUserpic)
         profileImageView.image = profileImage
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(profileImageView)
+        profileImageView.widthAnchor.constraint(equalToConstant: imageSize).isActive = true
+        profileImageView.heightAnchor.constraint(equalToConstant: imageSize).isActive = true
         profileImageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16).isActive = true
         profileImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32).isActive = true
+        profileImageView.layer.cornerRadius = imageSize / 2
+        profileImageView.clipsToBounds = true
+
     }
     
     private func createNameLabel() {
-        nameLabel.text = "Екатерина Новикова"
+        nameLabel.text = "Name"
         nameLabel.font = UIFont(name: "SFPro-Bold", size: 23)
         nameLabel.textColor = UIColor.ypWhite
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -44,24 +93,24 @@ final class ProfileViewController: UIViewController {
         nameLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 8).isActive = true
     }
     
-    private func createUserNameLabel() {
-        usernameLabel.text = "@ekaterina_nov"
-        usernameLabel.font = UIFont(name: "SFPro-Normal", size: 13)
-        usernameLabel.textColor = UIColor.ypGray
-        usernameLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(usernameLabel)
-        usernameLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16).isActive = true
-        usernameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8).isActive = true
+    private func createLoginNameLabel() {
+        loginNameLabel.text = "@login_name"
+        loginNameLabel.font = UIFont(name: "SFPro-Regular", size: 13)
+        loginNameLabel.textColor = UIColor.ypGray
+        loginNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(loginNameLabel)
+        loginNameLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16).isActive = true
+        loginNameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8).isActive = true
     }
     
-    private func createStatusLabel() {
-        statusLabel.text = "Hello, world!"
-        statusLabel.font = UIFont(name: "SFPro-Normal", size: 13)
-        statusLabel.textColor = UIColor.ypWhite
-        statusLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(statusLabel)
-        statusLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16).isActive = true
-        statusLabel.topAnchor.constraint(equalTo: usernameLabel.bottomAnchor, constant: 8).isActive = true
+    private func createBioLabel() {
+        bioLabel.text = "Bio Info"
+        bioLabel.font = UIFont(name: "SFPro-Regular", size: 13)
+        bioLabel.textColor = UIColor.ypWhite
+        bioLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(bioLabel)
+        bioLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16).isActive = true
+        bioLabel.topAnchor.constraint(equalTo: loginNameLabel.bottomAnchor, constant: 8).isActive = true
     }
     
     private func createLogoutButton() {
@@ -77,22 +126,21 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapLogoutButton() {
-        storage.removeToken()
-        
+        let isRemoved = storage.removeToken()
+        guard isRemoved else {
+            print("\(#file):\(#function): Cant remove token from storage")
+            return
+        }
         HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
         WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
             records.forEach { record in
                 WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
             }
         }
-        
         guard let window = UIApplication.shared.windows.first else {
-            assertionFailure("didTapLogoutButton: Invalid window configuration")
+            assertionFailure("\(#file):\(#function): Invalid window configuration")
             return
         }
-        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "SplashScreenId")
-        window.rootViewController = tabBarController
+        window.rootViewController = SplashViewController()
     }
 }
-

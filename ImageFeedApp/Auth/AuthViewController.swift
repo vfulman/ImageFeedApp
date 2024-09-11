@@ -1,10 +1,3 @@
-//
-//  AuthViewController.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 30.08.2024.
-//
-
 import UIKit
 
 protocol AuthViewControllerDelegate: AnyObject {
@@ -15,31 +8,21 @@ final class AuthViewController: UIViewController {
     weak var delegate: AuthViewControllerDelegate?
     
     private let oAuth2Service = OAuth2Service.shared
-    private let showWebViewSegueIdentifier = "ShowWebView"
     private let logoImageView = UIImageView()
     private let loginButton = UIButton(type: .custom)
     
+    private let webViewViewController = WebViewViewController()
     private let storage = OAuth2TokenStorage()
+    private let alertPresenter = AlertPresenter()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(resource: .ypBlack)
+        alertPresenter.delegate = self
+        webViewViewController.delegate = self
         createProfileImageView()
         createLoginButton()
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard segue.identifier == showWebViewSegueIdentifier
-        else {
-            super.prepare(for: segue, sender: sender)
-            return
-        }
-        
-        guard let webViewViewController = segue.destination as? WebViewViewController
-        else {
-            assertionFailure("Failed to prepare for \(showWebViewSegueIdentifier)")
-            return
-        }
-        webViewViewController.delegate = self
     }
     
     private func createProfileImageView() {
@@ -57,6 +40,7 @@ final class AuthViewController: UIViewController {
         loginButton.translatesAutoresizingMaskIntoConstraints = false
         loginButton.setTitleColor(.ypBlack, for: .normal)
         loginButton.setTitle("Войти", for: .normal)
+        loginButton.titleLabel?.font = UIFont.init(name: "SFPro-Bold", size: 17)
         loginButton.backgroundColor = UIColor(resource: .ypWhite)
         loginButton.layer.cornerRadius = 16.0
         loginButton.addTarget(self, action: #selector(didTapLoginButton), for: .touchUpInside)
@@ -69,27 +53,42 @@ final class AuthViewController: UIViewController {
     
     @objc
     private func didTapLoginButton() {
-        performSegue(withIdentifier: showWebViewSegueIdentifier, sender: nil)
+        navigationController?.pushViewController(webViewViewController, animated: true)
     }
 }
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        oAuth2Service.fetchOAuthToken(code: code) { result in
+        navigationController?.popViewController(animated: true)
+        UIBlockingProgressHUD.show()
+        oAuth2Service.fetchOAuthToken(code: code) { [weak self] result in
+            guard let self else { return }
+            UIBlockingProgressHUD.dismiss()
             switch result {
             case .success(let accessToken):
-                self.storage.storeToken(accessToken)
-                self.delegate?.didAuthenticate(self)
+                if self.storage.storeToken(accessToken) {
+                    self.delegate?.didAuthenticate(self)
+                }
+                else {
+                    print("\(#file):\(#function): Cant store token")
+                    self.navigationController?.popViewController(animated: true)
+                }
             case .failure(let error):
-                print("webViewViewController: Cant fetch token by \(code). \(error)")
+                print("\(#file):\(#function): Cant fetch token by \(code). \(error.description)")
+                alertPresenter.showAlert()
                 self.navigationController?.popViewController(animated: true)
             }
         }
     }
+    
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         navigationController?.popViewController(animated: true)
     }
 }
 
-
+extension AuthViewController: AlertPresenterDelegate {
+    func present(_ alertToPresent: UIAlertController) {
+        present(alertToPresent, animated: true)
+    }
+}
 

@@ -1,38 +1,34 @@
-//
-//  OAuth2TokenStorage.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 02.09.2024.
-//
-
 import UIKit
+import SwiftKeychainWrapper
 
 final class OAuth2TokenStorage {
-    private enum Keys: String {
-        case bearerToken
-    }
-    
     private let storage:UserDefaults = .standard
     
-    private var bearerToken: String? {
-        get {
-            storage.string(forKey: Keys.bearerToken.rawValue)
-        }
-        set {
-            storage.setValue(newValue, forKey: Keys.bearerToken.rawValue)
-        }
+    private enum Keys {
+        static let authToken = "Auth token"
     }
     
-    func storeToken(_ tokenValue: String) {
-        bearerToken = tokenValue
+    func storeToken(_ token: String) -> Bool {
+        let isSuccess = KeychainWrapper.standard.set(token, forKey: Keys.authToken)
+        guard isSuccess else {
+            print("\(#file):\(#function): Token saving failed")
+            return isSuccess
+        }
+        return isSuccess
     }
     
     func loadToken() -> String? {
-        return bearerToken
+        let token: String? = KeychainWrapper.standard.string(forKey: Keys.authToken)
+        return token
     }
     
-    func removeToken() {
-        storage.removeObject(forKey: Keys.bearerToken.rawValue)
+    func removeToken() -> Bool {
+        let isSuccess = KeychainWrapper.standard.removeObject(forKey: Keys.authToken)
+        guard isSuccess else {
+            print("\(#file):\(#function): Token removing failed")
+            return isSuccess
+        }
+        return isSuccess
     }
 }
 

@@ -1,10 +1,3 @@
-//
-//  Constants.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 30.08.2024.
-//
-
 import UIKit
 
 enum Constants {
@@ -12,5 +5,7 @@ enum Constants {
     static let secretKey = "bHc_7v1PmQQoGrN40JRl-IKDuAkfYOBgqij_u_Da2_U"
     static let redirectURI = "urn:ietf:wg:oauth:2.0:oob"
     static let accessScope = "public+read_user+write_likes"
-    static let defaultBaseURL = URL(string: "https://api.unsplash.com")!
+    static let defaultBaseURL = "https://api.unsplash.com"
 }
+
+

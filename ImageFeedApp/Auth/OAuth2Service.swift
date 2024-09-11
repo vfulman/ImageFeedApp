@@ -1,39 +1,74 @@
-//
-//  OAuth2Service.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 01.09.2024.
-//
-
 import UIKit
 
 
-
-enum OAuthConstants {
-    static let unsplashOAuthTokenURLString = "https://unsplash.com/oauth/token"
-}
-
-struct OAuthTokenResponseBody: Decodable {
-    let access_token: String
-    let token_type: String
-    let scope: String
-    let created_at: Int
-}
-
 final class OAuth2Service {
+    static let shared = OAuth2Service()
     
-    enum NetworkError: Error {
-        case codeError
-        case loadImageError
+    private var task: URLSessionTask?
+    private var lastCode: String?
+    
+    private enum OAuthConstants {
+        static let unsplashOAuthTokenURLString = "https://unsplash.com/oauth/token"
+    }
+    private struct OAuthTokenResponseBody: Decodable {
+        let accessToken: String
+        let tokenType: String
+        let scope: String
+        let createdAt: Int
+        
+        enum CodingKeys: String, CodingKey {
+            case accessToken = "access_token"
+            case tokenType = "token_type"
+            case scope
+            case createdAt = "created_at"
+        }
     }
     
-    static let shared = OAuth2Service()
+    
     
     private init() {}
     
-    private func makeOAuthTokenRequest(code: String) -> URLRequest {
+    func fetchOAuthToken(code: String, completion: @escaping (Result<String, NetworkError>) -> Void) {
+        assert(Thread.isMainThread)
+        
+        guard lastCode != code
+        else {
+            print("\(#file):\(#function):\(NetworkError.duplicateRequest.description) with code: \(code)")
+            completion(.failure(NetworkError.duplicateRequest))
+            return
+        }
+        
+        task?.cancel()
+        lastCode = code
+        
+        guard let request = makeOAuthTokenRequest(code: code)
+        else {
+            print("\(#file):\(#function):\(NetworkError.invalidRequest.description) with code: \(code)")
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
+        
+        let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, NetworkError>) in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.task = nil
+                self.lastCode = nil
+                switch result {
+                case .failure(let error):
+                    print("\(#file):\(#function): failure \(error.description))")
+                    completion(.failure(error))
+                case .success(let decodedData):
+                    completion(.success(decodedData.accessToken))
+                }
+            }
+        }
+        task.resume()
+    }
+    
+    private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: OAuthConstants.unsplashOAuthTokenURLString) else {
-            preconditionFailure("makeOAuthTokenRequest: Unable to create URLComponents with wtring \(OAuthConstants.unsplashOAuthTokenURLString)")
+            print("\(#file):\(#function): Unable to create URLComponents with wtring \(OAuthConstants.unsplashOAuthTokenURLString)")
+            return nil
         }
         urlComponents.queryItems = [
             URLQueryItem(name: "client_id", value: Constants.accessKey),
@@ -44,36 +79,14 @@ final class OAuth2Service {
         ]
         
         guard let url = urlComponents.url else {
-            preconditionFailure("Unable to create URLComponents")
+            print("\(#file):\(#function): Unable to create URLComponents")
+            return nil
         }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
         return request
-    }
-    
-    func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let request = makeOAuthTokenRequest(code: code)
-        
-        let task = URLSession.shared.data(for: request) { [weak self] result in
-            DispatchQueue.main.async {
-                guard self != nil else {return}
-                switch result {
-                case .failure(let error):
-                    print("fetchOAuthToken: failure \(error))")
-                case .success(let data):
-                    do {
-                        let tokenData = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
-                        completion(.success(tokenData.access_token))
-                    } catch {
-                        print("fetchOAuthToken: Decoding failure \(error)")
-                        completion(.failure(error))
-                    }
-                }
-            }
-        }
-        task.resume()
     }
 }
 

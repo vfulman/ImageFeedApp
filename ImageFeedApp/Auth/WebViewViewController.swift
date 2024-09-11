@@ -1,16 +1,7 @@
-//
-//  WebViewViewController.swift
-//  ImageFeedApp
-//
-//  Created by Виталий Фульман on 31.08.2024.
-//
-
 import UIKit
 import WebKit
 
-enum WebViewConstants {
-    static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
-}
+
 
 protocol WebViewViewControllerDelegate: AnyObject {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String)
@@ -20,13 +11,17 @@ protocol WebViewViewControllerDelegate: AnyObject {
 final class WebViewViewController: UIViewController {
     weak var delegate: WebViewViewControllerDelegate?
     
-    private let segueIdentifier = "ShowWebView"
     private let webView = WKWebView()
     private let progressView = UIProgressView(progressViewStyle: .default)
+    private var estimatedProgressObservation: NSKeyValueObservation?
     
+    private enum WebViewConstants {
+        static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(resource: .ypWhite)
         webView.navigationDelegate = self
         createWebView()
         configureBackButton()
@@ -36,22 +31,12 @@ final class WebViewViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
+        
+        estimatedProgressObservation = webView.observe(\.estimatedProgress, options: []) { [weak self] _, _ in
+                 guard let self = self else { return }
+                 self.updateProgress()}
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), context: nil)
-    }
-    
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == #keyPath(WKWebView.estimatedProgress) {
-            updateProgress()
-        } else {
-            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-        }
-    }
-
     private func updateProgress() {
         progressView.setProgress(Float(webView.estimatedProgress), animated: true)
         progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
@@ -76,7 +61,7 @@ final class WebViewViewController: UIViewController {
     
     private func loadAuthView() {
         guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
-            print("loadAuthView: Can not create urlComponents with string \(WebViewConstants.unsplashAuthorizeURLString)")
+            print("\(#file):\(#function): Can not create urlComponents with string \(WebViewConstants.unsplashAuthorizeURLString)")
             return
         }
         
@@ -88,7 +73,7 @@ final class WebViewViewController: UIViewController {
         ]
         
         guard let url = urlComponents.url else {
-            print("loadAuthView: Can not found url in \(urlComponents)")
+            print("\(#file):\(#function): Can not found url in \(urlComponents)")
             return
         }
         
@@ -111,9 +96,7 @@ final class WebViewViewController: UIViewController {
         view.addSubview(progressView)
         progressView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
         progressView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
-        progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        
-        
+        progressView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true  
     }
     
     private func code(from navigationAction: WKNavigationAction) -> String? {
