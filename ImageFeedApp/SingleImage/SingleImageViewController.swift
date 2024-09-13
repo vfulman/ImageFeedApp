@@ -10,7 +10,7 @@ final class SingleImageViewController: UIViewController {
         }
     }
     
-    private let singleImage = UIImageView()
+    let singleImage = UIImageView()
     private let backwardButton = UIButton()
     private let scrollView = UIScrollView()
     private let shareButton = UIButton()
@@ -18,7 +18,7 @@ final class SingleImageViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        scrollView.minimumZoomScale = 0.1
+        scrollView.minimumZoomScale = 0.05
         scrollView.maximumZoomScale = 1.25
         createScrollView()
         createSingleImage()
@@ -27,10 +27,10 @@ final class SingleImageViewController: UIViewController {
 
         scrollView.delegate = self
         
-        guard let image else { return }
-        singleImage.image = image
-        singleImage.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
+//        guard let image else { return }
+//        singleImage.image = image
+//        singleImage.frame.size = image.size
+//        rescaleAndCenterImageInScrollView(image: image)
     }
     
     private func createScrollView() {

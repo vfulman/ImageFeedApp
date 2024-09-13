@@ -19,7 +19,9 @@ final class ImagesListService {
     var task: URLSessionTask?
     
     private (set) var photos: [Photo] = []
+    
     private var lastLoadedPage: Int?
+    private var currentLoadedPage: Int?
     
     private enum ImageListServiceConstants {
         static let unsplashPhotosURLString = "\(Constants.defaultBaseURL)/photos"
@@ -55,14 +57,22 @@ final class ImagesListService {
         let thumb: String
     }
     
-//    private init() {}
+    private init() {}
     
     func fetchPhotosNextPage(completion: @escaping (Result<Void, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
         
-        task?.cancel()
+        guard task == nil else {
+            print("\(#file):\(#function):\(NetworkError.duplicateRequest.description)")
+            completion(.failure(NetworkError.duplicateRequest))
+            return
+        }
         
         let nextPage = (lastLoadedPage ?? 0) + 1
+        
+        guard currentLoadedPage == nil else { return }
+        
+        currentLoadedPage = nextPage
         
         guard let request = makeImagesListRequest(page: nextPage)
         else {
@@ -80,6 +90,7 @@ final class ImagesListService {
                     print("\(#file):\(#function):Fetch photos from page \(nextPage) failure \(error.description))")
                     completion(.failure(error))
                 case .success(let decodedPhotosData):
+                    self.lastLoadedPage = self.currentLoadedPage
                     for photo in decodedPhotosData {
                         self.photos.append(
                             Photo(
@@ -90,16 +101,15 @@ final class ImagesListService {
                                 thumbImageURL: photo.urls.thumb,
                                 largeImageURL: photo.urls.full,
                                 isLiked: photo.likedByUser))
-//                        print(self.photos[self.photos.count - 1])
                     }
-                    self.lastLoadedPage = nextPage
                     completion(.success(()))
                     NotificationCenter.default.post(
                         name: ImagesListService.didChangeNotification,
-                            object: self
-//                            userInfo: ["URL": self.profileImageURL as Any]
+                            object: self,
+                            userInfo: ["LastLoadedPage": self.lastLoadedPage as Any]
                     )
                 }
+                self.currentLoadedPage = nil
             }
         }
         task.resume()

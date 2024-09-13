@@ -8,4 +8,10 @@ enum Constants {
     static let defaultBaseURL = "https://api.unsplash.com"
 }
 
-
+//enum Constants {
+//    static let accessKey = "GPgUety2skJ-HwJ17gY6hpE2sT0zGnXUZqnu0-LRbZc"
+//    static let secretKey = "6ukPrq4G_a6FdoLgw4SXUnQg3QyUSq2JPhPiyv__x8o"
+//    static let redirectURI = "urn:ietf:wg:oauth:2.0:oob"
+//    static let accessScope = "public+read_user+write_likes"
+//    static let defaultBaseURL = URL(string: "https://api.unsplash.com")!
+//}

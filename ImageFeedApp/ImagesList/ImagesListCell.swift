@@ -1,5 +1,7 @@
 import UIKit
 
+import Kingfisher
+
 final class ImagesListCell: UITableViewCell {
     let contentImage = UIImageView()
     let likeButton = UIButton()
@@ -24,6 +26,7 @@ final class ImagesListCell: UITableViewCell {
     
     private func createImageView() {
         contentImage.translatesAutoresizingMaskIntoConstraints = false
+        contentImage.backgroundColor = .ypGray
         contentView.addSubview(contentImage)
         contentImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16).isActive = true
         contentImage.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16).isActive = true
@@ -74,5 +77,12 @@ final class ImagesListCell: UITableViewCell {
         gradient.frame = CGRect(x: 0, y: 0, width: contentView.bounds.width, height: gradientHeight)
         gradient.colors = [UIColor.clear.cgColor, UIColor.ypBlack.withAlphaComponent(0.2).cgColor]
         gradientView.layer.addSublayer(gradient)
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        // Отменяем загрузку, чтобы избежать багов при переиспользовании ячеек
+        contentImage.kf.cancelDownloadTask()
     }
 }
