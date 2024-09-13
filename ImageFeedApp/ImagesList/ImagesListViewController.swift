@@ -29,7 +29,6 @@ final class ImagesListViewController: UIViewController {
         singleImageView.modalPresentationStyle = .fullScreen
         imagesTableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.reuseIdentifier)
         imagesTableView.separatorStyle = .none
-        
         imagesListServiceObserver = NotificationCenter.default.addObserver(
             forName: ImagesListService.didChangeNotification,
             object: nil,
@@ -40,6 +39,7 @@ final class ImagesListViewController: UIViewController {
         }
         updateTableViewAnimated()
         imagesListService.fetchPhotosNextPage { _ in }
+        alertPresenter.delegate = self
     }
     
     func updateTableViewAnimated() {
@@ -115,21 +115,7 @@ extension ImagesListViewController: UITableViewDataSource {
 
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard
-            let url = URL(string: photos[indexPath.row].largeImageURL)
-        else { return }
-        
-        UIBlockingProgressHUD.show()
-        KingfisherManager.shared.retrieveImage(with: url) { result in
-            UIBlockingProgressHUD.dismiss()
-            switch result {
-            case .success(let value):
-                self.singleImageView.image = value.image
-                print(value.cacheType)
-            case .failure(let error):
-                print("\(#file):\(#function): Photo image loading error \(error)")
-            }
-        }
+        singleImageView.loadImage(url: photos[indexPath.row].largeImageURL)
         present(singleImageView, animated: true)
     }
     
@@ -160,13 +146,20 @@ extension ImagesListViewController: ImagesListCellDelegate {
             guard let self else { return }
             switch result {
             case .failure(let error):
+                print("\(#file):\(#function):Change like for image failure \(error.description))")
                 UIBlockingProgressHUD.dismiss()
-                alertPresenter.showAlert()
+                alertPresenter.showAlert(alertType: .likeErrorAlert)
             case .success():
                 self.photos = self.imagesListService.photos
                 cell.setLikeImage(isLiked: photos[indexPath.row].isLiked)
                 UIBlockingProgressHUD.dismiss()
             }
         }
+    }
+}
+
+extension ImagesListViewController: AlertPresenterDelegate {
+    func present(_ alertToPresent: UIAlertController) {
+        present(alertToPresent, animated: true)
     }
 }

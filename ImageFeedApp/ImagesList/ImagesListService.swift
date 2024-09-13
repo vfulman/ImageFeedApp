@@ -59,6 +59,10 @@ final class ImagesListService {
     
     private init() {}
     
+    func clearPhotosInfo() {
+        photos.removeAll()
+    }
+    
     func fetchPhotosNextPage(completion: @escaping (Result<Void, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
         
@@ -144,7 +148,7 @@ final class ImagesListService {
         return request
     }
     
-    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
         
 //        ??

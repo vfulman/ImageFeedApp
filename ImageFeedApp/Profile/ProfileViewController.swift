@@ -12,6 +12,8 @@ final class ProfileViewController: UIViewController {
     private let logoutButton = UIButton(type: .custom)
         
     private let profileService = ProfileService.shared
+    private let profileLogoutService = ProfileLogoutService.shared
+
     private var profileImageServiceObserver: NSObjectProtocol?
     
     
@@ -126,17 +128,9 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapLogoutButton() {
-        let isRemoved = storage.removeToken()
-        guard isRemoved else {
-            print("\(#file):\(#function): Cant remove token from storage")
-            return
-        }
-        HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
-        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-            records.forEach { record in
-                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
-            }
-        }
+
+        profileLogoutService.logout()
+
         guard let window = UIApplication.shared.windows.first else {
             assertionFailure("\(#file):\(#function): Invalid window configuration")
             return

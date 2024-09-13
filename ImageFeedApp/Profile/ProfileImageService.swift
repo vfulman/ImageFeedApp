@@ -34,6 +34,10 @@ final class ProfileImageService {
     
     private init() {}
     
+    func clearProfileImageInfo() {
+        profileImageURL = nil
+    }
+    
     func fetchProfileImageURL(_ username: String, _ token: String, completion: @escaping (Result<Void, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
         
