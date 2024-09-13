@@ -48,7 +48,7 @@ final class ProfileViewController: UIViewController {
         ) { result in
                 switch result {
                 case .success(let value):
-                    print(value.image)
+//                    print(value.image)
                     print(value.cacheType)
                 case .failure(let error):
                     print("\(#file):\(#function): Image loading error \(error)")

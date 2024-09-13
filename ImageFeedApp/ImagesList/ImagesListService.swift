@@ -70,8 +70,8 @@ final class ImagesListService {
         
         let nextPage = (lastLoadedPage ?? 0) + 1
         
+//        ??
         guard currentLoadedPage == nil else { return }
-        
         currentLoadedPage = nextPage
         
         guard let request = makeImagesListRequest(page: nextPage)
@@ -105,8 +105,8 @@ final class ImagesListService {
                     completion(.success(()))
                     NotificationCenter.default.post(
                         name: ImagesListService.didChangeNotification,
-                            object: self,
-                            userInfo: ["LastLoadedPage": self.lastLoadedPage as Any]
+                        object: self,
+                        userInfo: ["LastLoadedPage": self.lastLoadedPage as Any]
                     )
                 }
                 self.currentLoadedPage = nil
@@ -131,9 +131,72 @@ final class ImagesListService {
             return nil
         }
         
-        print(url)
-        var request = URLRequest(url: url)
+//        ???
+        guard let token = OAuth2TokenStorage().loadToken()
+        else {
+            print("\(#file):\(#function): authorization token was not found")
+            return nil
+        }
         
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        return request
+    }
+    
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+        assert(Thread.isMainThread)
+        
+//        ??
+        guard task == nil else {
+            print("\(#file):\(#function):\(NetworkError.duplicateRequest.description)")
+            completion(.failure(NetworkError.duplicateRequest))
+            return
+        }
+        
+        guard let request = makeChangingLikeRequest(photoId: photoId, isLike: isLike)
+        else {
+            print("\(#file):\(#function):\(NetworkError.invalidRequest.description)")
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
+        
+//        ??
+        let task = URLSession.shared.data(for: request) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.task = nil
+                switch result {
+                case .failure(let error):
+                    print("\(#file):\(#function):Change like for image id \(photoId) failure \(error.description))")
+                    completion(.failure(error))
+                case .success(_):
+                    if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
+                        let photo = self.photos[index]
+                        let newPhoto = Photo(
+                            id: photo.id,
+                            size: photo.size,
+                            createdAt: photo.createdAt,
+                            welcomeDescription: photo.welcomeDescription,
+                            thumbImageURL: photo.thumbImageURL,
+                            largeImageURL: photo.largeImageURL,
+                            isLiked: !photo.isLiked
+                        )
+                        self.photos[index] = newPhoto
+                    }
+                    completion(.success(()))
+                }
+            }
+        }
+        task.resume()
+    }
+    
+    private func makeChangingLikeRequest(photoId: String, isLike: Bool) -> URLRequest? {
+        guard let url = URL(string: "\(ImageListServiceConstants.unsplashPhotosURLString)/\(photoId)/like")
+        else {
+            print("\(#file):\(#function): Can not create URL from string: \"\(ImageListServiceConstants.unsplashPhotosURLString)/\(photoId)/like\"")
+            return nil
+        }
         // ???
         guard let token = OAuth2TokenStorage().loadToken()
         else {
@@ -141,9 +204,17 @@ final class ImagesListService {
             return nil
         }
         
+        var request = URLRequest(url: url)
+        switch isLike {
+        case true:
+            request.httpMethod = "POST"
+        case false:
+            request.httpMethod = "DELETE"
+        }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         return request
+        
     }
 }
 
