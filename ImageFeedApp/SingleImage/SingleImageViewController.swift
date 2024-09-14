@@ -24,7 +24,8 @@ final class SingleImageViewController: UIViewController {
             switch result {
             case .success(let imageResult):
                 self.rescaleAndCenterImageInScrollView(image: imageResult.image)
-            case .failure:
+            case .failure(let error):
+                print("\(#file):\(#function): Image loading error \(error)")
                 alertPresenter.showAlert(alertType: .singleImageErrorAlert) { [weak self] in
                     guard let self else { return }
                     guard let retryURL = self.retryURL else { return }

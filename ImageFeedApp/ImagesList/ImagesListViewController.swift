@@ -79,16 +79,18 @@ final class ImagesListViewController: UIViewController {
             switch result {
             case .success(let value):
                 self.imagesTableView.reloadRows(at: [indexPath], with: .automatic)
-//                print(value.image)
-                print(value.cacheType)
             case .failure(let error):
                 print("\(#file):\(#function): Photo image loading error \(error)")
             }
         }
         
         cell.setLikeImage(isLiked: photos[indexPath.row].isLiked)
-//        ??
-        cell.dateStamp.text = dateFormatter.string(from: photos[indexPath.row].createdAt ?? Date())
+
+        if let date = photos[indexPath.row].createdAt {
+            cell.dateStamp.text = dateFormatter.string(from: date)
+        } else {
+            cell.dateStamp.text = ""
+        }
         cell.addGradientIfNeeded()
     }
 }

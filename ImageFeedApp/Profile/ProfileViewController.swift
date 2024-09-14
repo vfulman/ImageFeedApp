@@ -48,14 +48,13 @@ final class ProfileViewController: UIViewController {
             with: url,
             placeholder: UIImage(resource: .defaultUserpic)
         ) { result in
-                switch result {
-                case .success(let value):
-//                    print(value.image)
-                    print(value.cacheType)
-                case .failure(let error):
-                    print("\(#file):\(#function): Image loading error \(error)")
-                }
+            switch result {
+            case .success(let value):
+                break
+            case .failure(let error):
+                print("\(#file):\(#function): Image loading error \(error)")
             }
+        }
     }
     
     private func updateProfileDetails(profile: Profile?) {

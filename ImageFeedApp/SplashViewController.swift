@@ -25,7 +25,6 @@ final class SplashViewController: UIViewController {
         super.viewDidAppear(animated)
         if let token = storage.loadToken() {
             fetchProfile(token)
-//            switchToTabBarController()
         } else {
             present(authNavigationontroller, animated: true)
         }
@@ -82,6 +81,5 @@ extension SplashViewController: AuthViewControllerDelegate {
             return
         }
         fetchProfile(token)
-//        switchToTabBarController()
     }
 }

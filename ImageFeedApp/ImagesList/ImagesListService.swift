@@ -17,11 +17,11 @@ final class ImagesListService {
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
     var task: URLSessionTask?
+    var likeTask: URLSessionTask?
     
     private (set) var photos: [Photo] = []
     
     private var lastLoadedPage: Int?
-    private var currentLoadedPage: Int?
     
     private enum ImageListServiceConstants {
         static let unsplashPhotosURLString = "\(Constants.defaultBaseURL)/photos"
@@ -74,10 +74,6 @@ final class ImagesListService {
         
         let nextPage = (lastLoadedPage ?? 0) + 1
         
-//        ??
-        guard currentLoadedPage == nil else { return }
-        currentLoadedPage = nextPage
-        
         guard let request = makeImagesListRequest(page: nextPage)
         else {
             print("\(#file):\(#function):\(NetworkError.invalidRequest.description)")
@@ -94,7 +90,7 @@ final class ImagesListService {
                     print("\(#file):\(#function):Fetch photos from page \(nextPage) failure \(error.description))")
                     completion(.failure(error))
                 case .success(let decodedPhotosData):
-                    self.lastLoadedPage = self.currentLoadedPage
+                    self.lastLoadedPage = nextPage
                     for photo in decodedPhotosData {
                         self.photos.append(
                             Photo(
@@ -113,7 +109,6 @@ final class ImagesListService {
                         userInfo: ["LastLoadedPage": self.lastLoadedPage as Any]
                     )
                 }
-                self.currentLoadedPage = nil
             }
         }
         task.resume()
@@ -135,7 +130,6 @@ final class ImagesListService {
             return nil
         }
         
-//        ???
         guard let token = OAuth2TokenStorage().loadToken()
         else {
             print("\(#file):\(#function): authorization token was not found")
@@ -151,8 +145,7 @@ final class ImagesListService {
     func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
         
-//        ??
-        guard task == nil else {
+        guard likeTask == nil else {
             print("\(#file):\(#function):\(NetworkError.duplicateRequest.description)")
             completion(.failure(NetworkError.duplicateRequest))
             return
@@ -165,11 +158,10 @@ final class ImagesListService {
             return
         }
         
-//        ??
-        let task = URLSession.shared.data(for: request) { [weak self] result in
+        let likeTask = URLSession.shared.data(for: request) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self else { return }
-                self.task = nil
+                self.likeTask = nil
                 switch result {
                 case .failure(let error):
                     print("\(#file):\(#function):Change like for image id \(photoId) failure \(error.description))")
@@ -192,7 +184,7 @@ final class ImagesListService {
                 }
             }
         }
-        task.resume()
+        likeTask.resume()
     }
     
     private func makeChangingLikeRequest(photoId: String, isLike: Bool) -> URLRequest? {
@@ -201,7 +193,7 @@ final class ImagesListService {
             print("\(#file):\(#function): Can not create URL from string: \"\(ImageListServiceConstants.unsplashPhotosURLString)/\(photoId)/like\"")
             return nil
         }
-        // ???
+
         guard let token = OAuth2TokenStorage().loadToken()
         else {
             print("\(#file):\(#function): authorization token was not found")
