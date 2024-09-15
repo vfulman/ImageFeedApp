@@ -84,12 +84,8 @@ final class ImagesListCell: UITableViewCell {
     }
     
     func setLikeImage(isLiked: Bool) {
-        switch isLiked {
-        case true:
-            likeButton.setImage(.likeOn, for: .normal)
-        case false:
-            likeButton.setImage(.likeOff, for: .normal)
-        }
+        let likeImageState = isLiked ? UIImage.likeOn : UIImage.likeOff
+        likeButton.setImage(likeImageState, for: .normal)
     }
     
     override func prepareForReuse() {

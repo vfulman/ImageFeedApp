@@ -8,7 +8,7 @@ final class SingleImageViewController: UIViewController {
     private let shareButton = UIButton()
     private let stubImage = UIImageView()
     
-    let alertPresenter = AlertPresenter()
+    private let alertPresenter = AlertPresenter()
     
     private var retryURL: String?
     

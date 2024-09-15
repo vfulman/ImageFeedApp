@@ -16,11 +16,12 @@ final class ImagesListService {
     static let shared = ImagesListService()
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
-    var task: URLSessionTask?
+    var fetchPhotosTask: URLSessionTask?
     var likeTask: URLSessionTask?
     
     private (set) var photos: [Photo] = []
     
+    private let dateFormatterISO8601 = ISO8601DateFormatter()
     private var lastLoadedPage: Int?
     
     private enum ImageListServiceConstants {
@@ -66,7 +67,7 @@ final class ImagesListService {
     func fetchPhotosNextPage(completion: @escaping (Result<Void, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
         
-        guard task == nil else {
+        guard fetchPhotosTask == nil else {
             print("\(#file):\(#function):\(NetworkError.duplicateRequest.description)")
             completion(.failure(NetworkError.duplicateRequest))
             return
@@ -84,7 +85,7 @@ final class ImagesListService {
         let task = URLSession.shared.objectTask(for: request) {[weak self] (result: Result<[PhotoResultBody], NetworkError>) in
             DispatchQueue.main.async {
                 guard let self else { return }
-                self.task = nil
+                self.fetchPhotosTask = nil
                 switch result {
                 case .failure(let error):
                     print("\(#file):\(#function):Fetch photos from page \(nextPage) failure \(error.description))")
@@ -96,7 +97,7 @@ final class ImagesListService {
                             Photo(
                                 id: photo.id,
                                 size: CGSize(width: photo.width, height: photo.height),
-                                createdAt: ISO8601DateFormatter().date(from: photo.createdAt),
+                                createdAt: self.dateFormatterISO8601.date(from: photo.createdAt),
                                 welcomeDescription: photo.description,
                                 thumbImageURL: photo.urls.thumb,
                                 largeImageURL: photo.urls.full,
@@ -151,7 +152,7 @@ final class ImagesListService {
             return
         }
         
-        guard let request = makeChangingLikeRequest(photoId: photoId, isLike: isLike)
+        guard let request = makeChangingLikeRequest(photoId: photoId, isLiked: isLike)
         else {
             print("\(#file):\(#function):\(NetworkError.invalidRequest.description)")
             completion(.failure(NetworkError.invalidRequest))
@@ -187,7 +188,7 @@ final class ImagesListService {
         likeTask.resume()
     }
     
-    private func makeChangingLikeRequest(photoId: String, isLike: Bool) -> URLRequest? {
+    private func makeChangingLikeRequest(photoId: String, isLiked: Bool) -> URLRequest? {
         guard let url = URL(string: "\(ImageListServiceConstants.unsplashPhotosURLString)/\(photoId)/like")
         else {
             print("\(#file):\(#function): Can not create URL from string: \"\(ImageListServiceConstants.unsplashPhotosURLString)/\(photoId)/like\"")
@@ -201,12 +202,8 @@ final class ImagesListService {
         }
         
         var request = URLRequest(url: url)
-        switch isLike {
-        case true:
-            request.httpMethod = "POST"
-        case false:
-            request.httpMethod = "DELETE"
-        }
+        
+        request.httpMethod = isLiked ? "POST" : "DELETE"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         return request
