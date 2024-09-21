@@ -10,6 +10,7 @@ final class OAuth2Service {
     private enum OAuthConstants {
         static let unsplashOAuthTokenURLString = "https://unsplash.com/oauth/token"
     }
+    
     private struct OAuthTokenResponseBody: Decodable {
         let accessToken: String
         let tokenType: String
@@ -23,8 +24,6 @@ final class OAuth2Service {
             case createdAt = "created_at"
         }
     }
-    
-    
     
     private init() {}
     

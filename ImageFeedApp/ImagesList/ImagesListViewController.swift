@@ -77,7 +77,7 @@ final class ImagesListViewController: UIViewController {
             placeholder: UIImage(resource: .stub)
         ) { result in
             switch result {
-            case .success(let value):
+            case .success(_):
                 self.imagesTableView.reloadRows(at: [indexPath], with: .automatic)
             case .failure(let error):
                 print("\(#file):\(#function): Photo image loading error \(error)")
