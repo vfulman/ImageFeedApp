@@ -4,6 +4,7 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
     private let storage = OAuth2TokenStorage()
+    private let alertPresenter = AlertPresenter()
     
     private let profileImageView = UIImageView()
     private let nameLabel = UILabel()
@@ -12,11 +13,14 @@ final class ProfileViewController: UIViewController {
     private let logoutButton = UIButton(type: .custom)
         
     private let profileService = ProfileService.shared
+    private let profileLogoutService = ProfileLogoutService.shared
+
     private var profileImageServiceObserver: NSObjectProtocol?
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        alertPresenter.delegate = self
         view.backgroundColor = UIColor(resource: .ypBlack)
         createProfileImageView()
         createNameLabel()
@@ -46,14 +50,13 @@ final class ProfileViewController: UIViewController {
             with: url,
             placeholder: UIImage(resource: .defaultUserpic)
         ) { result in
-                switch result {
-                case .success(let value):
-                    print(value.image)
-                    print(value.cacheType)
-                case .failure(let error):
-                    print("\(#file):\(#function): Image loading error \(error)")
-                }
+            switch result {
+            case .success(let value):
+                break
+            case .failure(let error):
+                print("\(#file):\(#function): Image loading error \(error)")
             }
+        }
     }
     
     private func updateProfileDetails(profile: Profile?) {
@@ -126,21 +129,20 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapLogoutButton() {
-        let isRemoved = storage.removeToken()
-        guard isRemoved else {
-            print("\(#file):\(#function): Cant remove token from storage")
-            return
-        }
-        HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
-        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-            records.forEach { record in
-                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
+        alertPresenter.showAlert(alertType: .logoutAlert) { [weak self] in
+            guard let self else { return }
+            self.profileLogoutService.logout()
+            guard let window = UIApplication.shared.windows.first else {
+                assertionFailure("\(#file):\(#function): Invalid window configuration")
+                return
             }
+            window.rootViewController = SplashViewController()
         }
-        guard let window = UIApplication.shared.windows.first else {
-            assertionFailure("\(#file):\(#function): Invalid window configuration")
-            return
-        }
-        window.rootViewController = SplashViewController()
+    }
+}
+
+extension ProfileViewController: AlertPresenterDelegate {
+    func present(_ alertToPresent: UIAlertController) {
+        present(alertToPresent, animated: true)
     }
 }

@@ -75,7 +75,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 }
             case .failure(let error):
                 print("\(#file):\(#function): Cant fetch token by \(code). \(error.description)")
-                alertPresenter.showAlert()
+                alertPresenter.showAlert(alertType: .authErrorAlert)
                 self.navigationController?.popViewController(animated: true)
             }
         }

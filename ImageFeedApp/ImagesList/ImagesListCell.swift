@@ -1,14 +1,21 @@
 import UIKit
 
+import Kingfisher
+
+protocol ImagesListCellDelegate: AnyObject {
+    func imageListCellDidTapLike(_ cell: ImagesListCell)
+}
+
 final class ImagesListCell: UITableViewCell {
     let contentImage = UIImageView()
     let likeButton = UIButton()
     let dateStamp = UILabel()
     
+    weak var delegate: ImagesListCellDelegate?
+    
     private let gradientView: UIView = UIView()
     
     static let reuseIdentifier = "ImagesListCell"
-    
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -24,6 +31,7 @@ final class ImagesListCell: UITableViewCell {
     
     private func createImageView() {
         contentImage.translatesAutoresizingMaskIntoConstraints = false
+        contentImage.backgroundColor = .ypGray
         contentView.addSubview(contentImage)
         contentImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16).isActive = true
         contentImage.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16).isActive = true
@@ -43,7 +51,6 @@ final class ImagesListCell: UITableViewCell {
     }
     
     private func createLikeButton() {
-        likeButton.setImage(UIImage(resource: .logout), for: .normal)
         likeButton.translatesAutoresizingMaskIntoConstraints = false
         likeButton.addTarget(self, action: #selector(didTapLikeButton), for: .touchUpInside)
         contentView.addSubview(likeButton)
@@ -55,7 +62,7 @@ final class ImagesListCell: UITableViewCell {
     
     @objc
     private func didTapLikeButton() {
-        // TODO
+        delegate?.imageListCellDidTapLike(self)
     }
     
     func addGradientIfNeeded() {
@@ -74,5 +81,15 @@ final class ImagesListCell: UITableViewCell {
         gradient.frame = CGRect(x: 0, y: 0, width: contentView.bounds.width, height: gradientHeight)
         gradient.colors = [UIColor.clear.cgColor, UIColor.ypBlack.withAlphaComponent(0.2).cgColor]
         gradientView.layer.addSublayer(gradient)
+    }
+    
+    func setLikeImage(isLiked: Bool) {
+        let likeImageState = isLiked ? UIImage.likeOn : UIImage.likeOff
+        likeButton.setImage(likeImageState, for: .normal)
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        contentImage.kf.cancelDownloadTask()
     }
 }
