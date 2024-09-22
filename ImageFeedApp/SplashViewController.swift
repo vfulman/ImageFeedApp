@@ -24,8 +24,8 @@ final class SplashViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if let token = storage.loadToken() {
-//            fetchProfile(token)
-            switchToTabBarController()
+            fetchProfile(token)
+//            switchToTabBarController()
         } else {
             present(authNavigationontroller, animated: true)
         }
@@ -81,7 +81,7 @@ extension SplashViewController: AuthViewControllerDelegate {
             print("\(#file):\(#function): authorization token was not found")
             return
         }
-//        fetchProfile(token)
-        switchToTabBarController()
+        fetchProfile(token)
+//        switchToTabBarController()
     }
 }

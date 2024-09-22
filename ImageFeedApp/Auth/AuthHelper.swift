@@ -32,7 +32,7 @@ final class AuthHelper: AuthHelperProtocol {
             URLQueryItem(name: "scope", value: configuration.accessScope)
         ]
         
-        guard let url = urlComponents.url else {
+        guard urlComponents.url != nil else {
             print("\(#file):\(#function): Can not found url in \(urlComponents)")
             return nil
         }
@@ -50,6 +50,6 @@ final class AuthHelper: AuthHelperProtocol {
         } else {
             return nil
         }
-    } 
+    }
     
 }

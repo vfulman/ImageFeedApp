@@ -1,11 +1,18 @@
 import UIKit
 
 
-struct Profile {
-    let username:String
+public struct Profile {
+    let username: String
     let name: String
     let loginName: String
     let bio: String
+    
+    public init(username: String, name: String, loginName: String, bio: String) {
+        self.username = username
+        self.name = name
+        self.loginName = loginName
+        self.bio = bio
+    }
 }
 
 final class ProfileService {
@@ -17,7 +24,7 @@ final class ProfileService {
     private(set) var profile: Profile?
     
     private enum ProfileServiceConstants {
-        static let unsplashUserProfileURLString = "\(Constants.defaultBaseURL)/me"
+        static let unsplashUserProfileURLString = "\(AuthConfiguration.standard.defaultBaseURL)/me"
     }
     private struct ProfileResultBody: Decodable {
         let username: String
