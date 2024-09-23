@@ -34,6 +34,7 @@ final class AuthViewController: UIViewController {
     }
     
     private func createLoginButton() {
+        loginButton.accessibilityIdentifier = "Authenticate"
         loginButton.translatesAutoresizingMaskIntoConstraints = false
         loginButton.setTitleColor(.ypBlack, for: .normal)
         loginButton.setTitle("Войти", for: .normal)
@@ -46,6 +47,8 @@ final class AuthViewController: UIViewController {
         loginButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16).isActive = true
         loginButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor).isActive = true
         loginButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -90).isActive = true
+        
+
     }
     
     @objc

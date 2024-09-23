@@ -82,7 +82,7 @@ final class AlertPresenter {
         let alert = UIAlertController(title: AlertPresenterConstants.logoutTitle,
                                       message: AlertPresenterConstants.logoutMessage,
                                       preferredStyle: .alert)
-        alert.view.accessibilityIdentifier = "logoutAlert"
+        alert.view.accessibilityIdentifier = "LogoutAlert"
         let retryAction = UIAlertAction(title: "Да", style: .default) { _ in
             action?()
         }
@@ -91,6 +91,8 @@ final class AlertPresenter {
             alert.dismiss(animated: true)
         }
         
+        retryAction.accessibilityIdentifier = "LogoutAlertYes"
+        cancelAction.accessibilityIdentifier = "LogoutAlertNo"
         alert.addAction(retryAction)
         alert.addAction(cancelAction)
         alert.preferredAction = cancelAction

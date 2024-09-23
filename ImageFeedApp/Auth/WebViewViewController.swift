@@ -67,6 +67,7 @@ final class WebViewViewController: UIViewController, WebViewViewControllerProtoc
     }
     
     private func createWebView() {
+        webView.accessibilityIdentifier = "UnsplashWebView"
         webView.translatesAutoresizingMaskIntoConstraints = false
         webView.backgroundColor = UIColor(resource: .ypWhite)
         view.addSubview(webView)

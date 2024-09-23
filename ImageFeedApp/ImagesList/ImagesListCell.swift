@@ -51,6 +51,7 @@ final class ImagesListCell: UITableViewCell {
     }
     
     private func createLikeButton() {
+        likeButton.accessibilityIdentifier = "LikeButton"
         likeButton.translatesAutoresizingMaskIntoConstraints = false
         likeButton.addTarget(self, action: #selector(didTapLikeButton), for: .touchUpInside)
         contentView.addSubview(likeButton)

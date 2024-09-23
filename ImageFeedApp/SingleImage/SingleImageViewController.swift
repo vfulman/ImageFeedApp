@@ -76,6 +76,7 @@ final class SingleImageViewController: UIViewController {
     }
     
     private func createBackwardButton() {
+        backwardButton.accessibilityIdentifier = "BackwardButton"
         backwardButton.setImage(UIImage(resource: .backward), for: .normal)
         backwardButton.translatesAutoresizingMaskIntoConstraints = false
         backwardButton.addTarget(self, action: #selector(didTapBackwardButton), for: .touchUpInside)

@@ -50,7 +50,7 @@ final class ProfileService {
     
     func fetchProfile(_ token: String, completion: @escaping (Result<Void, NetworkError>) -> Void) {
         assert(Thread.isMainThread)
-        
+        print(AuthConfiguration.standard.accessKey)
         task?.cancel()
         
         guard let request = makeProfileInfoRequest(token: token)
