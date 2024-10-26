@@ -2,7 +2,15 @@ import UIKit
 import WebKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
+
+protocol ProfileViewControllerProtocol: AnyObject {
+    var presenter: ProfilePresenterProtocol? { get set }
+}
+
+
+final class ProfileViewController: UIViewController, ProfileViewControllerProtocol {
+    var presenter: ProfilePresenterProtocol?
+    
     private let storage = OAuth2TokenStorage()
     private let alertPresenter = AlertPresenter()
     
@@ -12,11 +20,7 @@ final class ProfileViewController: UIViewController {
     private let bioLabel = UILabel()
     private let logoutButton = UIButton(type: .custom)
         
-    private let profileService = ProfileService.shared
-    private let profileLogoutService = ProfileLogoutService.shared
-
     private var profileImageServiceObserver: NSObjectProtocol?
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,7 +31,7 @@ final class ProfileViewController: UIViewController {
         createLoginNameLabel()
         createBioLabel()
         createLogoutButton()
-        updateProfileDetails(profile: profileService.profile)
+        updateProfileDetails(profile: presenter?.profile)
         
         profileImageServiceObserver = NotificationCenter.default.addObserver(
             forName: ProfileImageService.didChangeNotification,
@@ -43,7 +47,7 @@ final class ProfileViewController: UIViewController {
     
     private func updateProfileImage() {
         guard
-            let profileImageURL = ProfileImageService.shared.profileImageURL,
+            let profileImageURL = presenter?.profileImageUrl,
             let url = URL(string: profileImageURL)
         else { return }
         profileImageView.kf.setImage(
@@ -51,7 +55,7 @@ final class ProfileViewController: UIViewController {
             placeholder: UIImage(resource: .defaultUserpic)
         ) { result in
             switch result {
-            case .success(let value):
+            case .success(_):
                 break
             case .failure(let error):
                 print("\(#file):\(#function): Image loading error \(error)")
@@ -68,7 +72,6 @@ final class ProfileViewController: UIViewController {
         nameLabel.text = profile.name
         loginNameLabel.text = profile.loginName
         bioLabel.text = profile.bio
-        
     }
     
     private func createProfileImageView() {
@@ -117,6 +120,7 @@ final class ProfileViewController: UIViewController {
     }
     
     private func createLogoutButton() {
+        logoutButton.accessibilityIdentifier = "LogoutButton"
         logoutButton.setImage(UIImage(resource: .logout), for: .normal)
         logoutButton.translatesAutoresizingMaskIntoConstraints = false
         logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
@@ -131,7 +135,7 @@ final class ProfileViewController: UIViewController {
     private func didTapLogoutButton() {
         alertPresenter.showAlert(alertType: .logoutAlert) { [weak self] in
             guard let self else { return }
-            self.profileLogoutService.logout()
+            presenter?.logout()
             guard let window = UIApplication.shared.windows.first else {
                 assertionFailure("\(#file):\(#function): Invalid window configuration")
                 return

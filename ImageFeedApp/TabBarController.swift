@@ -1,5 +1,6 @@
 import UIKit
 
+
 final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -11,13 +12,20 @@ final class TabBarController: UITabBarController {
     }
 
     func setupTabBar() {
+        let imageListPresenter = ImagesListPresenter()
         let imagesListViewController = ImagesListViewController()
+        imagesListViewController.presenter = imageListPresenter
+        
         imagesListViewController.tabBarItem = UITabBarItem(
             title: "",
             image: UIImage(resource: .tabEditorialActive),
             selectedImage: nil
         )
+        
+        let profilePresenter = ProfilePresenter()
         let profileViewController = ProfileViewController()
+        profileViewController.presenter = profilePresenter
+
         profileViewController.tabBarItem = UITabBarItem(
             title: "",
             image: UIImage(resource: .tabProfileActive),

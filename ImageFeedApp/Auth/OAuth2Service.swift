@@ -6,10 +6,12 @@ final class OAuth2Service {
     
     private var task: URLSessionTask?
     private var lastCode: String?
-    
+    private let configuration = AuthConfiguration.standard
+
     private enum OAuthConstants {
         static let unsplashOAuthTokenURLString = "https://unsplash.com/oauth/token"
     }
+    
     private struct OAuthTokenResponseBody: Decodable {
         let accessToken: String
         let tokenType: String
@@ -23,8 +25,6 @@ final class OAuth2Service {
             case createdAt = "created_at"
         }
     }
-    
-    
     
     private init() {}
     
@@ -71,9 +71,9 @@ final class OAuth2Service {
             return nil
         }
         urlComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: Constants.accessKey),
-            URLQueryItem(name: "client_secret", value: Constants.secretKey),
-            URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
+            URLQueryItem(name: "client_id", value: configuration.accessKey),
+            URLQueryItem(name: "client_secret", value: configuration.secretKey),
+            URLQueryItem(name: "redirect_uri", value: configuration.redirectURI),
             URLQueryItem(name: "code", value: code),
             URLQueryItem(name: "grant_type", value: "authorization_code"),
         ]
